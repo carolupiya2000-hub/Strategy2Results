@@ -1348,4 +1348,21 @@ buildStratFund();
 
 </script>
 </body>
+  <script>
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Remove active state from all buttons
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+    // Show selected page
+    const target = btn.getAttribute('data-page');
+    const page = document.getElementById(target);
+    if (page) page.classList.add('active');
+  });
+});
+</script>
 </html>
