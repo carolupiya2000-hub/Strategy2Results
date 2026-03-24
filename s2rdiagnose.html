@@ -849,7 +849,7 @@ function submitAccess() {
   const input = document.getElementById("access-pw");
   const error = document.getElementById("access-err");
 
-  const code = input.value.trim();
+  const code = input.value.trim().toUpperCase();
 
   if (VALID_CODES.includes(code)) {
     localStorage.setItem(ACCESS_KEY, "true");
