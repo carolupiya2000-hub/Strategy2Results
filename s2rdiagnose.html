@@ -368,7 +368,7 @@ footer{background:var(--navy-dk);color:rgba(255,255,255,.32);text-align:center;p
     <div style="font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--navy);margin-bottom:.3rem">S2R Foundations</div>
     <div style="font-size:.8rem;color:var(--tx2);margin-bottom:1.3rem;line-height:1.7">
       This module is access-controlled.<br><br>
-      <a href="mailto:info@impactisconsulting.com?subject=S2R%20Access%20Request&body=Hi%20Impactis%20Team%2C%0D%0A%0D%0AI%20would%20like%20to%20request%20access%20to%20the%20Strategy2Results%C2%AE%20Foundations%20Diagnostics.%0D%0A%0D%0AName%3A%0D%0AOrganisation%3A%0D%0ARole%3A%0D%0A%0D%0AThank%20you." style="color:var(--navy);font-weight:600;text-decoration:underline;">Request your access code</a><br><br>
+      <a href="/cdn-cgi/l/email-protection#cea7a0a8a18ea7a3beafadbaa7bdada1a0bdbba2baa7a0a9e0ada1a3f1bdbbaca4abadbaf39dfc9cebfcfe8fadadabbdbdebfcfe9cabbfbbabbdbae8aca1aab7f386a7ebfcfe87a3beafadbaa7bdebfcfe9aabafa3ebfc8debfe8aebfe8febfe8aebfe8f87ebfcfeb9a1bba2aaebfcfea2a7a5abebfcfebaa1ebfcfebcabbfbbabbdbaebfcfeafadadabbdbdebfcfebaa1ebfcfebaa6abebfcfe9dbabcafbaaba9b7fc9cabbdbba2babdeb8dfceb8f8bebfcfe88a1bba0aaafbaa7a1a0bdebfcfe8aa7afa9a0a1bdbaa7adbde0ebfe8aebfe8febfe8aebfe8f80afa3abebfd8febfe8aebfe8f81bca9afa0a7bdafbaa7a1a0ebfd8febfe8aebfe8f9ca1a2abebfd8febfe8aebfe8febfe8aebfe8f9aa6afa0a5ebfcfeb7a1bbe0" style="color:var(--navy);font-weight:600;text-decoration:underline;">Request your access code</a><br><br>
       Access is valid for 6 months from first entry.
     </div>
     <div style="position:relative;margin-bottom:.65rem">
@@ -384,7 +384,7 @@ footer{background:var(--navy-dk);color:rgba(255,255,255,.32);text-align:center;p
 
 <footer>S2R Foundations · Strategy Foundation Diagnostics · Strategy2Results® · Impactis Consulting · All rights reserved</footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── DATA ──
 var R = {};
 var CONCEPTS = [
@@ -822,7 +822,7 @@ function emailReport() {
 
 // ── ACCESS CONTROL ──
 var ACCESS_DAYS = 180; // 6 months
-var ACCESS_EXP = 's2r_fd_exp';
+var ACCESS_EXP = 's2r_2025_fresh';
 // Valid access codes — add client codes here as needed
 var VALID_CODES = ['Impactis2025', 'ImpactisConsulting', 'S2R2025'];
 
@@ -855,6 +855,7 @@ function submitAccess() {
   if (VALID_CODES.indexOf(pw) !== -1) {
     grantAccess();
     document.getElementById('access-overlay').style.display = 'none';
+    init();
   } else {
     err.textContent = 'Incorrect access code. Please contact info@impactisconsulting.com';
     document.getElementById('access-pw').value = '';
@@ -867,23 +868,6 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ── INIT ──
-var _done=false;
-function init(){
-  if(_done)return;_done=true;
+function init() {
   var gm = {proc:'g-proc', '4w':'g-4w', vt:'g-vt', env:'g-env'};
-  CONCEPTS.forEach(function(c) {
-    var w = document.getElementById(gm[c.g]);
-    if (w) w.appendChild(mkCC(c));
-  });
-  var eg = document.getElementById('eg-grid');
-  if (eg) ENGINE.forEach(function(e) { eg.appendChild(mkEC(e)); });
-  buildChain();
-  updateBar();
-}
-
-// ── BOOT ──
-init();
-if(checkAccess()){document.getElementById('access-overlay').style.display='none';}
-</script>
-</body>
-</html>
+  CONCEPTS.forE
