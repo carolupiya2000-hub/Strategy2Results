@@ -807,9 +807,10 @@ function init(){
 
 // ── BOOT ──
 init();
+
 </script>
-</body>
-</html>
+
+<!-- ✅ ADD YOUR ACCESS SCRIPT HERE -->
 <script>
 
 // ===== ACCESS CONTROL CONFIG =====
@@ -821,12 +822,8 @@ const VALID_CODES = [
 
 const ACCESS_KEY = "s2r_access_granted";
 const ACCESS_TIME_KEY = "s2r_access_time";
-
-// 6 months
 const ACCESS_DURATION = 180 * 24 * 60 * 60 * 1000;
 
-
-// ===== CHECK ACCESS ON LOAD =====
 function checkAccess() {
   const granted = localStorage.getItem(ACCESS_KEY);
   const accessTime = localStorage.getItem(ACCESS_TIME_KEY);
@@ -840,7 +837,6 @@ function checkAccess() {
   const elapsed = now - Number(accessTime);
 
   if (elapsed > ACCESS_DURATION) {
-    // Expired → reset
     localStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem(ACCESS_TIME_KEY);
     showAccess();
@@ -849,8 +845,6 @@ function checkAccess() {
   }
 }
 
-
-// ===== SUBMIT ACCESS CODE =====
 function submitAccess() {
   const input = document.getElementById("access-pw");
   const error = document.getElementById("access-err");
@@ -870,8 +864,6 @@ function submitAccess() {
   }
 }
 
-
-// ===== SHOW / HIDE =====
 function showAccess() {
   const el = document.getElementById("access-overlay");
   if (el) el.style.display = "flex";
@@ -882,8 +874,9 @@ function hideAccess() {
   if (el) el.style.display = "none";
 }
 
-
-// ===== RUN ON LOAD =====
 window.addEventListener("load", checkAccess);
 
 </script>
+
+</body>
+</html>
