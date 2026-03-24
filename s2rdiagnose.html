@@ -821,69 +821,13 @@ init();
 
 <script>
 
-// ===== ACCESS CONTROL CONFIG =====
-const VALID_CODES = [
-  "S2R-FOUNDATIONS-001",
-  "S2R-FOUNDATIONS-002",
-  "S2R-FOUNDATIONS-003"
-];
-
-const ACCESS_KEY = "s2r_access_granted";
-const ACCESS_TIME_KEY = "s2r_access_time";
-const ACCESS_DURATION = 180 * 24 * 60 * 60 * 1000;
-
-function checkAccess() {
-  const granted = localStorage.getItem(ACCESS_KEY);
-  const accessTime = localStorage.getItem(ACCESS_TIME_KEY);
-
-  if (!granted || !accessTime) {
-    showAccess();
-    return;
-  }
-
-  const now = Date.now();
-  const elapsed = now - Number(accessTime);
-
-  if (elapsed > ACCESS_DURATION) {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(ACCESS_TIME_KEY);
-    showAccess();
-  } else {
-    hideAccess();
-  }
-}
-
-function submitAccess() {
-  const input = document.getElementById("access-pw");
-  const error = document.getElementById("access-err");
-
-  const code = input.value.trim().toUpperCase();
-
-  if (VALID_CODES.includes(code)) {
-    localStorage.setItem(ACCESS_KEY, "true");
-    localStorage.setItem(ACCESS_TIME_KEY, Date.now());
-
-    error.innerText = "";
-    input.value = "";
-
-    hideAccess();
-  } else {
-    error.innerText = "Invalid access code";
-  }
-}
-
-function showAccess() {
-  const el = document.getElementById("access-overlay");
-  if (el) el.style.display = "flex";
-}
-
-function hideAccess() {
-  const el = document.getElementById("access-overlay");
-  if (el) el.style.display = "none";
-}
-
 function toggleAccess(el) {
   const input = document.getElementById("access-pw");
+
+  if (!input) {
+    alert("Input not found");
+    return;
+  }
 
   if (input.type === "password") {
     input.type = "text";
@@ -893,24 +837,6 @@ function toggleAccess(el) {
     el.innerText = "SHOW";
   }
 }
-
-// ===== TEST RENDER =====
-function renderTest() {
-  const container = document.getElementById("g-proc");
-
-  if (!container) return;
-
-  container.innerHTML = `
-    <div style="padding:10px;border:1px solid #ccc;margin-top:10px;">
-      ✅ Your page is now rendering correctly
-    </div>
-  `;
-}
-
-window.addEventListener("load", () => {
-  checkAccess();
-  renderTest();
-});
 
 </script>
 
