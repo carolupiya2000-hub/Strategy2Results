@@ -378,7 +378,18 @@ Request your access code
 
 Access is valid for 6 months from first entry.
 </div>
-    <input id="access-pw" type="password" placeholder="Enter access code" style="width:100%;padding:.55rem .75rem;border:1px solid var(--bdr2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:.65rem;outline:none">
+    <div style="position:relative">
+  <input id="access-pw" type="password" placeholder="Enter access code"
+    style="width:100%;padding:.55rem .75rem;border:1px solid var(--bdr2);
+    border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;
+    margin-bottom:.65rem;outline:none">
+
+  <span onclick="toggleAccess()" 
+    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    font-size:.7rem;color:var(--navy);cursor:pointer;font-weight:600">
+    SHOW
+  </span>
+</div>
     <div id="access-err" style="color:#B22222;font-size:.75rem;margin-bottom:.55rem;min-height:1.1rem"></div>
     <button onclick="submitAccess()" style="width:100%;padding:.6rem;background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer">Access Module</button>
     <div style="font-size:.68rem;color:var(--tx3);margin-top:.9rem">Contact your Impactis consultant if you need an access code.</div>
@@ -875,7 +886,15 @@ function hideAccess() {
 }
 
 window.addEventListener("load", checkAccess);
+function toggleAccess() {
+  const input = document.getElementById("access-pw");
 
+  if (input.type === "password") {
+    input.type = "text";
+  } else {
+    input.type = "password";
+  }
+}
 </script>
 
 </body>
