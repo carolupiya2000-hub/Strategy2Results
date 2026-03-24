@@ -867,10 +867,9 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ── INIT ──
-var _initialized = false;
-function init() {
-  if (_initialized) return;
-  _initialized = true;
+var _done=false;
+function init(){
+  if(_done)return;_done=true;
   var gm = {proc:'g-proc', '4w':'g-4w', vt:'g-vt', env:'g-env'};
   CONCEPTS.forEach(function(c) {
     var w = document.getElementById(gm[c.g]);
@@ -884,9 +883,7 @@ function init() {
 
 // ── BOOT ──
 init();
-if (checkAccess()) {
-  document.getElementById('access-overlay').style.display = 'none';
-}
+if(checkAccess()){document.getElementById('access-overlay').style.display='none';}
 </script>
 </body>
 </html>
