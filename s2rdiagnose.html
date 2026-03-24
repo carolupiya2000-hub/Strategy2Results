@@ -824,7 +824,7 @@ function emailReport() {
 var ACCESS_DAYS = 180; // 6 months
 var ACCESS_EXP = 's2r_fd_exp';
 // Valid access codes — add client codes here as needed
-var VALID_CODES = ['Impactis2025', 'ImpactisConsulting', 'S2RDIG26'];
+var VALID_CODES = ['Impactis2025', 'ImpactisConsulting', 'S2R2025'];
 
 function checkAccess() {
   try {
@@ -855,7 +855,6 @@ function submitAccess() {
   if (VALID_CODES.indexOf(pw) !== -1) {
     grantAccess();
     document.getElementById('access-overlay').style.display = 'none';
-    init();
   } else {
     err.textContent = 'Incorrect access code. Please contact info@impactisconsulting.com';
     document.getElementById('access-pw').value = '';
@@ -868,7 +867,10 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ── INIT ──
+var _initialized = false;
 function init() {
+  if (_initialized) return;
+  _initialized = true;
   var gm = {proc:'g-proc', '4w':'g-4w', vt:'g-vt', env:'g-env'};
   CONCEPTS.forEach(function(c) {
     var w = document.getElementById(gm[c.g]);
@@ -881,10 +883,9 @@ function init() {
 }
 
 // ── BOOT ──
+init();
 if (checkAccess()) {
-  init();
-} else {
-  document.getElementById('access-overlay').style.display = 'flex';
+  document.getElementById('access-overlay').style.display = 'none';
 }
 </script>
 </body>
