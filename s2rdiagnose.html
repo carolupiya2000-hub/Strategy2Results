@@ -886,13 +886,15 @@ function hideAccess() {
 }
 
 window.addEventListener("load", checkAccess);
-function toggleAccess() {
+function toggleAccess(el) {
   const input = document.getElementById("access-pw");
 
   if (input.type === "password") {
     input.type = "text";
+    el.innerText = "HIDE";
   } else {
     input.type = "password";
+    el.innerText = "SHOW";
   }
 }
 </script>
