@@ -805,6 +805,8 @@ init();
 </script>
 </body>
 </html>
+<script>
+
 // ===== ACCESS CONTROL CONFIG =====
 const VALID_CODES = [
   "S2R-FOUNDATIONS-001",
@@ -829,10 +831,11 @@ function checkAccess() {
     return;
   }
 
-  const now = new Date().getTime();
-  const elapsed = now - parseInt(accessTime);
+  const now = Date.now();
+  const elapsed = now - Number(accessTime);
 
   if (elapsed > ACCESS_DURATION) {
+    // Expired → reset
     localStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem(ACCESS_TIME_KEY);
     showAccess();
@@ -844,27 +847,38 @@ function checkAccess() {
 
 // ===== SUBMIT ACCESS CODE =====
 function submitAccess() {
-  const code = document.getElementById("access-pw").value.trim();
+  const input = document.getElementById("access-pw");
+  const error = document.getElementById("access-err");
+
+  const code = input.value.trim();
 
   if (VALID_CODES.includes(code)) {
     localStorage.setItem(ACCESS_KEY, "true");
-    localStorage.setItem(ACCESS_TIME_KEY, new Date().getTime());
+    localStorage.setItem(ACCESS_TIME_KEY, Date.now());
+
+    error.innerText = "";
+    input.value = "";
+
     hideAccess();
   } else {
-    document.getElementById("access-err").innerText = "Invalid access code";
+    error.innerText = "Invalid access code";
   }
 }
 
 
 // ===== SHOW / HIDE =====
 function showAccess() {
-  document.getElementById("access-overlay").style.display = "flex";
+  const el = document.getElementById("access-overlay");
+  if (el) el.style.display = "flex";
 }
 
 function hideAccess() {
-  document.getElementById("access-overlay").style.display = "none";
+  const el = document.getElementById("access-overlay");
+  if (el) el.style.display = "none";
 }
 
 
 // ===== RUN ON LOAD =====
 window.addEventListener("load", checkAccess);
+
+</script>
