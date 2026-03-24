@@ -1,61 +1,1838 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Build</title>
-<link rel="stylesheet" href="styles.css">
-</head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S2R BUILD — Lens 1: Aligning Heart & Mind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+/* ── SHARED DESIGN TOKENS (copy :root block to every new lens) ── */
+:root{
+  --navy:#1B3F7A;--navy-dk:#0F2550;--navy-lt:#2C5099;
+  --red:#8C1A1A;--red-m:#B22222;
+  --bg:#F8F7F4;--surf:#FFFFFF;--surf2:#F2F0EC;
+  --bdr:#E2DFD8;--bdr2:#CCC9C0;
+  --tx:#1A1A2E;--tx2:#4A4A5E;--tx3:#8A8A9E;
+  --build-bg:#F0EBF8;--build-bd:#9B8FD8;--build-tx:#3C2A8C;
+  --arc1-bg:#E8F4FD;--arc1-bd:#5BA3D9;--arc1-tx:#0C3D6B;
+  --arc2-bg:#FFF0E8;--arc2-bd:#E88A1A;--arc2-tx:#6B3200;
+  --arc3-bg:#F5EAF8;--arc3-bd:#9B4FCC;--arc3-tx:#4A0A7A;
+  --arc4-bg:#E8F8F0;--arc4-bd:#2DB57A;--arc4-tx:#0A4A2A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
 
+/* NAV */
+.topnav{background:var(--navy-dk);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:200;border-bottom:2px solid var(--build-bd)}
+.nav-left{display:flex;align-items:center;gap:.9rem}
+.back-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.75);font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:500;cursor:pointer;border-radius:6px;padding:.3rem .7rem;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-crumb{font-size:.7rem;color:rgba(255,255,255,.4)}
+.nav-crumb span{color:rgba(255,255,255,.75);font-weight:500}
+.lens-pip{background:var(--build-bd);color:#fff;font-size:.66rem;font-weight:700;padding:.22rem .6rem;border-radius:20px;letter-spacing:.06em}
+
+/* LENS HERO */
+.lens-hero{background:linear-gradient(140deg,#0B1E4A 0%,#18215A 55%,#22145A 100%);padding:2.75rem 1.5rem 2.25rem;overflow:hidden;position:relative}
+.lens-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 12% 65%,rgba(155,143,216,.18) 0%,transparent 48%),radial-gradient(circle at 88% 18%,rgba(45,100,200,.14) 0%,transparent 42%)}
+.hero-inner{max-width:960px;margin:0 auto;position:relative}
+.hero-camp{font-size:.68rem;font-weight:700;color:var(--build-bd);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.55rem}
+.hero-h1{font-family:'DM Serif Display',serif;font-size:2.2rem;font-weight:400;color:#fff;line-height:1.2;margin-bottom:.6rem}
+.hero-h1 em{color:#C4B4F8;font-style:normal}
+.hero-p{font-size:.87rem;color:rgba(255,255,255,.62);max-width:640px;line-height:1.72;margin-bottom:1.4rem}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.78);padding:.27rem .82rem;border-radius:20px;font-size:.7rem;font-weight:500}
+
+/* ARC NAV */
+.arc-nav{background:var(--surf);border-bottom:1px solid var(--bdr);position:sticky;top:58px;z-index:150;overflow-x:auto}
+.arc-nav-inner{max-width:960px;margin:0 auto;display:flex;padding:0 1.5rem}
+.arc-tab{padding:.82rem 1rem;font-size:.73rem;font-weight:500;color:var(--tx3);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+.arc-tab .anum{width:20px;height:20px;border-radius:50%;background:var(--surf2);font-size:.64rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.arc-tab.active{color:var(--build-tx);border-bottom-color:var(--build-bd)}
+.arc-tab.active .anum{background:var(--build-bd);color:#fff}
+.arc-tab:hover:not(.active){color:var(--tx2);border-bottom-color:var(--bdr2)}
+
+/* MAIN */
+.main{max-width:960px;margin:0 auto;padding:1.5rem 1.5rem 5rem}
+.arc-sec{display:none}.arc-sec.active{display:block}
+
+/* ARC HEADER */
+.arc-hdr{border-radius:14px;padding:1.4rem 1.6rem;margin-bottom:1.5rem;border:1.5px solid;overflow:hidden}
+.arc-hdr.a1{background:var(--arc1-bg);border-color:var(--arc1-bd)}
+.arc-hdr.a2{background:var(--arc2-bg);border-color:var(--arc2-bd)}
+.arc-hdr.a3{background:var(--arc3-bg);border-color:var(--arc3-bd)}
+.arc-hdr.a4{background:var(--arc4-bg);border-color:var(--arc4-bd)}
+.arc-lbl{font-size:.65rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin-bottom:.38rem}
+.a1 .arc-lbl{color:var(--arc1-tx)}.a2 .arc-lbl{color:var(--arc2-tx)}.a3 .arc-lbl{color:var(--arc3-tx)}.a4 .arc-lbl{color:var(--arc4-tx)}
+.arc-hdr-h{font-family:'DM Serif Display',serif;font-size:1.55rem;margin-bottom:.48rem;line-height:1.25}
+.a1 .arc-hdr-h{color:var(--arc1-tx)}.a2 .arc-hdr-h{color:var(--arc2-tx)}.a3 .arc-hdr-h{color:var(--arc3-tx)}.a4 .arc-hdr-h{color:var(--arc4-tx)}
+.arc-hdr-p{font-size:.83rem;color:var(--tx2);line-height:1.7;max-width:720px}
+.arc-chips{display:flex;gap:7px;margin-top:.9rem;flex-wrap:wrap}
+.arc-chip{font-size:.67rem;font-weight:600;padding:.26rem .72rem;border-radius:20px;border:1.5px solid}
+.a1 .arc-chip{background:rgba(91,163,217,.1);border-color:var(--arc1-bd);color:var(--arc1-tx)}
+.a2 .arc-chip{background:rgba(232,138,26,.1);border-color:var(--arc2-bd);color:var(--arc2-tx)}
+.a3 .arc-chip{background:rgba(155,79,204,.1);border-color:var(--arc3-bd);color:var(--arc3-tx)}
+.a4 .arc-chip{background:rgba(45,181,122,.1);border-color:var(--arc4-bd);color:var(--arc4-tx)}
+
+/* PRINCIPLE CARDS */
+.principle-grid{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.5rem}
+.pcard{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;border-left:4px solid var(--build-bd);transition:border-color .2s}
+.pcard.active{border-left-color:var(--build-tx);box-shadow:0 2px 12px rgba(60,42,140,.08)}
+.pcard-hdr{display:flex;align-items:center;gap:.9rem;padding:.95rem 1.1rem;cursor:pointer;transition:background .15s}
+.pcard-hdr:hover{background:var(--build-bg)}
+.pcard.active .pcard-hdr{background:var(--build-bg)}
+.pcard-num{font-size:.62rem;font-weight:700;color:var(--build-bd);letter-spacing:.08em;text-transform:uppercase;width:80px;flex-shrink:0}
+.pcard.active .pcard-num{color:var(--build-tx)}
+.pcard-title{font-size:.9rem;font-weight:600;color:var(--tx);flex:1}
+.pcard-arrow{font-size:.75rem;color:var(--tx3);transition:transform .22s;flex-shrink:0}
+.pcard.active .pcard-arrow{transform:rotate(180deg);color:var(--build-tx)}
+.pcard-body{font-size:.79rem;color:var(--tx2);line-height:1.68;padding:0 1.1rem 0;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s ease}
+.pcard.active .pcard-body{max-height:600px;padding:0 1.1rem 1rem}
+.pcard-tag{display:inline-block;font-size:.65rem;font-weight:700;padding:.18rem .5rem;border-radius:10px;margin-top:.65rem;background:var(--build-bg);color:var(--build-tx);border:1px solid var(--build-bd)}
+
+/* TOOLS */
+.tool-block{background:var(--surf);border:1px solid var(--bdr);border-radius:13px;margin-bottom:1.2rem;overflow:hidden}
+.tool-hdr{padding:.95rem 1.25rem;display:flex;align-items:center;gap:.8rem;cursor:pointer;transition:background .15s}
+.tool-hdr:hover{background:var(--surf2)}
+.ticon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.thdr-info{flex:1}
+.tnum{font-size:.63rem;font-weight:700;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
+.ttitle{font-size:.93rem;font-weight:600;color:var(--tx)}
+.tsub{font-size:.73rem;color:var(--tx3);margin-top:1px}
+.ttog{font-size:.82rem;color:var(--tx3);transition:transform .22s}
+.ttog.open{transform:rotate(180deg)}
+.tbody{padding:1.3rem;border-top:1px solid var(--bdr)}
+
+/* OCEANAL */
+.oceanal-intro{background:var(--build-bg);border:1px solid var(--build-bd);border-radius:9px;padding:.85rem 1rem;font-size:.8rem;color:var(--build-tx);line-height:1.68;margin-bottom:1.1rem}
+.score-tbl-wrap{overflow-x:auto;margin-bottom:.85rem}
+table.stbl{width:100%;border-collapse:collapse;font-size:.73rem;min-width:620px}
+table.stbl th{background:var(--navy-dk);color:rgba(255,255,255,.82);padding:.48rem .55rem;text-align:center;font-weight:600;font-size:.66rem;letter-spacing:.04em;white-space:nowrap}
+table.stbl th.tname{text-align:left;min-width:140px}
+table.stbl td{padding:.38rem .45rem;border-bottom:1px solid var(--bdr);text-align:center;vertical-align:middle}
+table.stbl tr:nth-child(even) td{background:var(--surf2)}
+table.stbl .tn{text-align:left;font-weight:600;font-size:.77rem;color:var(--tx)}
+table.stbl .td{font-size:.65rem;color:var(--tx3);display:block;font-weight:400;margin-top:1px}
+table.stbl input.si{width:42px;border:1px solid var(--bdr2);border-radius:5px;padding:.28rem .3rem;text-align:center;font-family:'DM Sans',sans-serif;font-size:.76rem;color:var(--tx);background:var(--surf)}
+table.stbl input.si:focus{outline:none;border-color:var(--build-bd);background:var(--build-bg)}
+.hlv{font-size:.7rem;font-weight:700;padding:.18rem .4rem;border-radius:4px}
+.hlv.H{background:#E8F8E8;color:#1A6A1A}.hlv.B{background:#FFF8E0;color:#7A5A00}.hlv.L{background:#FEE8E8;color:#8A1A1A}
+.calc-btn{background:var(--build-tx);color:#fff;border:none;border-radius:8px;padding:.62rem 1.2rem;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;margin-top:.35rem}
+.calc-btn:hover{background:#2A1A7A;transform:translateY(-1px)}
+.result-block{margin-top:1.2rem;display:none}
+.trait-result{background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;padding:.85rem 1rem;margin-bottom:.65rem}
+.tr-header{display:flex;align-items:center;gap:.7rem;margin-bottom:.5rem}
+.tr-name{font-size:.82rem;font-weight:600;color:var(--tx)}
+.tr-bars{display:flex;gap:3px;flex:1;max-width:160px}
+.tr-bar{height:7px;border-radius:3px}
+.tr-bar.bh{background:#2EA87A}.tr-bar.bb{background:#E8A020}.tr-bar.bl{background:#B22222}
+.tr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:.45rem}
+.trc{border-radius:7px;padding:.42rem .55rem}
+.trc.risk{background:#FEE8E8;border:1px solid #EEB0B0}
+.trc.resp{background:#E8F0FF;border:1px solid #A0B8EE}
+.trc.rout{background:#EEF8EE;border:1px solid #A0D0A0}
+.trc-lbl{font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.trc.risk .trc-lbl{color:#8A1A1A}.trc.resp .trc-lbl{color:#1A3A8A}.trc.rout .trc-lbl{color:#1A5A1A}
+.trc-txt{font-size:.67rem;color:var(--tx);line-height:1.45}
+.tr-dna{font-size:.73rem;color:var(--tx2);line-height:1.55;margin-bottom:.45rem;font-style:italic}
+
+/* SCARF */
+.scarf-intro{font-size:.81rem;color:var(--tx2);line-height:1.7;margin-bottom:1.1rem}
+.scarf-domains{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem;margin-bottom:1.2rem}
+@media(max-width:600px){.scarf-domains{grid-template-columns:repeat(3,1fr)}}
+.scarf-d{border-radius:9px;padding:.65rem .7rem;text-align:center}
+.sd-S{background:#E8F0FF;border:1.5px solid #5A80D0}
+.sd-C{background:#FFF0E0;border:1.5px solid #D8A020}
+.sd-A{background:#F0E8FF;border:1.5px solid #8A50C0}
+.sd-R{background:#E0FFEE;border:1.5px solid #2AB07A}
+.sd-F{background:#FFE8E8;border:1.5px solid #D04040}
+.sd-letter{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:2px}
+.sd-S .sd-letter{color:#1A3A8A}.sd-C .sd-letter{color:#7A5A00}.sd-A .sd-letter{color:#4A0A8A}.sd-R .sd-letter{color:#0A4A2A}.sd-F .sd-letter{color:#7A1A1A}
+.sd-name{font-size:.64rem;font-weight:700;color:var(--tx3)}
+
+.obs-list{display:flex;flex-direction:column;gap:.48rem;margin-bottom:1.2rem}
+.obs-row{background:var(--surf2);border:1px solid var(--bdr);border-radius:9px;padding:.72rem .95rem;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:.7rem;align-items:start;transition:all .15s}
+.obs-row:hover{border-color:var(--bdr2);background:#EDEAE6}
+.obs-row.logged{border-color:var(--arc1-bd);background:var(--arc1-bg)}
+.obs-sign{font-size:.78rem;font-weight:500;color:var(--tx);margin-bottom:.2rem}
+.obs-tag{display:inline-block;font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:10px;margin-right:3px}
+.dtag-Status{background:#E8F0FF;color:#1A3A8A}.dtag-Certainty{background:#FFF0E0;color:#7A3A00}
+.dtag-Autonomy{background:#F0E8FF;color:#4A0A8A}.dtag-Relatedness{background:#E0FFEE;color:#0A4A20}
+.dtag-Fairness{background:#FFE8E8;color:#7A1A1A}
+.obs-info{font-size:.68rem;color:var(--tx3);line-height:1.5;margin-top:.3rem;display:none}
+.obs-row.logged .obs-info{display:block}
+.obs-action{font-size:.68rem;color:var(--arc1-tx);font-style:italic;margin-top:.2rem;display:none}
+.obs-row.logged .obs-action{display:block}
+.log-btn{font-size:.66rem;font-weight:600;background:none;border:1.5px solid var(--bdr2);border-radius:6px;padding:.26rem .6rem;cursor:pointer;color:var(--tx3);font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.log-btn:hover{border-color:var(--build-bd);color:var(--build-tx)}
+.obs-row.logged .log-btn{background:var(--arc1-bd);border-color:var(--arc1-bd);color:#fff}
+.scarf-summary{margin-top:.5rem}
+.domain-bar{margin-bottom:.72rem}
+.db-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.db-name{font-size:.75rem;font-weight:600;color:var(--tx)}
+/* SCARF RICH REPORT */
+.scarf-report{margin-top:1.2rem}
+.scarf-climate-score{border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:1rem}
+.scs-green{background:#E8F8F0;border:1.5px solid var(--arc4-bd)}.scs-amber{background:#FFF8E0;border:1.5px solid #D8A020}.scs-red{background:#FEE8E8;border:1.5px solid #D04040}
+.scs-score{font-family:'DM Serif Display',serif;font-size:2.6rem;font-weight:400;min-width:60px;text-align:center;line-height:1}
+.scs-green .scs-score{color:var(--arc4-tx)}.scs-amber .scs-score{color:#7A5A00}.scs-red .scs-score{color:#8A1A1A}
+.scs-label{font-size:.88rem;font-weight:600;color:var(--tx);margin-bottom:.2rem}
+.scs-desc{font-size:.76rem;color:var(--tx2);line-height:1.6}
+.scarf-domain-report{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;margin-bottom:.7rem;overflow:hidden}
+.sdr-hdr{padding:.8rem 1rem;display:flex;align-items:center;gap:.75rem}
+.sdr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sdr-title{font-size:.82rem;font-weight:600;color:var(--tx);flex:1}
+.sdr-badge{font-size:.67rem;font-weight:700;padding:.2rem .6rem;border-radius:12px;white-space:nowrap}
+.badge-high{background:#FEE8E8;color:#8A1A1A;border:1px solid #EEB0B0}
+.badge-mod{background:#FFF8E0;color:#7A5A00;border:1px solid #E8C880}
+.badge-low{background:#E8F8F0;color:#0A4A2A;border:1px solid #90D0A8}
+.badge-none{background:var(--surf2);color:var(--tx3);border:1px solid var(--bdr)}
+.sdr-body{padding:.75rem 1rem;border-top:1px solid var(--bdr);background:var(--surf2)}
+.sdr-signs-lbl{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:.4rem}
+.sdr-sign-list{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.7rem}
+.sdr-sign-item{font-size:.74rem;color:var(--tx);padding:.3rem .55rem;background:var(--surf);border-radius:6px;border-left:2px solid #D04040}
+.sdr-action-lbl{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#0A4A2A;margin-bottom:.4rem}
+.sdr-actions{display:flex;flex-direction:column;gap:.3rem}
+.sdr-action-item{font-size:.74rem;color:#1A4A2A;padding:.3rem .55rem;background:#E8F8F0;border-radius:6px;border-left:2px solid var(--arc4-bd)}
+.sdr-readiness{font-size:.74rem;color:var(--tx2);line-height:1.6;padding:.55rem .7rem;background:var(--build-bg);border:1px solid var(--build-bd);border-radius:7px;margin-top:.65rem}
+/* STRATEGY IMPLICATIONS */
+.dna-implications{background:linear-gradient(135deg,#0F2550,#1E1560);border-radius:13px;padding:1.4rem 1.5rem;margin-top:1.3rem;color:#fff}
+.dna-impl-h{font-family:'DM Serif Display',serif;font-size:1.25rem;margin-bottom:.35rem}
+.dna-impl-p{font-size:.78rem;color:rgba(255,255,255,.6);margin-bottom:1rem;line-height:1.65}
+.dna-impl-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+@media(max-width:560px){.dna-impl-grid{grid-template-columns:1fr}}
+.dna-impl-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:.85rem .95rem}
+.dic-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem}
+.dic-label.risk{color:#F09090}.dic-label.design{color:#90C8F0}.dic-label.watch{color:#F0C870}.dic-label.strength{color:#90E8A8}
+.dic-txt{font-size:.74rem;color:rgba(255,255,255,.88);line-height:1.55}
+/* DATA COLLECTION NOTE */
+.data-collect-note{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:1.2rem;border-left:4px solid var(--arc2-bd)}
+.dcn-title{font-size:.82rem;font-weight:600;color:var(--arc2-tx);margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.dcn-options{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.65rem}
+@media(max-width:560px){.dcn-options{grid-template-columns:1fr}}
+.dcn-opt{border-radius:8px;padding:.75rem .9rem;border:1.5px solid var(--bdr);background:var(--surf2)}
+.dcn-opt-title{font-size:.78rem;font-weight:600;color:var(--tx);margin-bottom:.25rem}
+.dcn-opt-body{font-size:.72rem;color:var(--tx2);line-height:1.55}
+.db-status{font-size:.7rem;color:var(--tx3)}
+.db-track{height:8px;border-radius:4px;background:var(--bdr2);overflow:hidden}
+.db-fill{height:100%;border-radius:4px;transition:width .5s}
+.df-Status{background:#4A7AEE}.df-Certainty{background:#E88A1A}.df-Autonomy{background:#9A4AEE}.df-Relatedness{background:#2ABA6A}.df-Fairness{background:#EA3A3A}
+
+/* INTELLIGENCE TOOLS */
+.ignition-block{background:linear-gradient(135deg,#0F2550,#1E1560);border-radius:13px;padding:1.4rem 1.5rem;color:#fff;margin-bottom:1.2rem}
+.ign-title{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:.45rem}
+.ign-p{font-size:.82rem;color:rgba(255,255,255,.68);line-height:1.7;margin-bottom:1rem}
+.ign-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+@media(max-width:560px){.ign-grid{grid-template-columns:1fr}}
+.ign-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:.85rem 1rem}
+.ign-card-title{font-size:.82rem;font-weight:600;color:#fff;margin-bottom:.3rem}
+.ign-card-p{font-size:.73rem;color:rgba(255,255,255,.62);line-height:1.6}
+
+.cc-spectrum{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1.2rem}
+.cc-title{font-size:.82rem;font-weight:600;color:var(--tx);margin-bottom:.75rem}
+.cc-row{display:flex;align-items:center;gap:.85rem;margin-bottom:.65rem}
+.cc-label{font-size:.73rem;font-weight:600;width:110px;flex-shrink:0;color:var(--tx2)}
+input.cc-slider{flex:1;height:4px;accent-color:var(--build-bd)}
+.cc-val{font-size:.73rem;font-weight:700;width:34px;text-align:right;color:var(--build-tx)}
+.cc-feedback{font-size:.78rem;color:var(--tx2);line-height:1.6;margin-top:.75rem;padding:.65rem .85rem;background:var(--build-bg);border:1px solid var(--build-bd);border-radius:8px;min-height:42px}
+
+.aceit-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:1rem}
+.aceit-table th{background:var(--navy-dk);color:rgba(255,255,255,.82);padding:.5rem .65rem;text-align:left;font-weight:600;font-size:.67rem;letter-spacing:.04em}
+.aceit-table td{padding:.55rem .65rem;border-bottom:1px solid var(--bdr);vertical-align:top}
+.aceit-table tr:nth-child(even) td{background:var(--surf2)}
+.aceit-table .aceit-name{font-weight:700;font-size:.8rem;color:var(--tx)}
+.aceit-table .aceit-name span{display:block;font-size:.63rem;font-weight:400;color:var(--tx3);margin-top:1px}
+.aceit-table .obs-col input[type=checkbox]{accent-color:var(--build-bd);width:15px;height:15px;cursor:pointer;margin-right:3px}
+
+/* PEC FUNNEL */
+.pec-visual{display:flex;flex-direction:column;align-items:center;gap:0;margin:1rem 0;position:relative}
+.pec-layer{border-radius:6px;padding:.7rem 1.2rem;text-align:center;transition:all .2s;cursor:default;position:relative}
+.pec-layer:hover{filter:brightness(.95)}
+.pec-l1{background:#3C2A8C;color:#fff;width:85%;font-size:.8rem;font-weight:500}
+.pec-l2{background:var(--build-bd);color:#fff;width:65%;font-size:.78rem;font-weight:500;margin-top:2px}
+.pec-l3{background:var(--build-bg);border:1.5px solid var(--build-bd);color:var(--build-tx);width:45%;font-size:.76rem;font-weight:500;margin-top:2px}
+.pec-label{font-size:.62rem;font-weight:700;opacity:.75;letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:1px}
+.pec-caption{font-size:.72rem;color:var(--tx3);text-align:center;margin-top:.65rem;line-height:1.55}
+
+/* EMO THERMOMETER */
+.emo-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.9rem}
+.emo-tab{padding:.42rem .85rem;border:1.5px solid var(--bdr2);border-radius:20px;font-size:.73rem;font-weight:500;color:var(--tx3);cursor:pointer;transition:all .18s}
+.emo-tab[data-e="joy"].active{background:#FFF8D0;border-color:#D8C000;color:#6A5000}
+.emo-tab[data-e="fear"].active{background:#E8F0FF;border-color:#4A80E0;color:#1A3A8A}
+.emo-tab[data-e="anger"].active{background:#FEE8E8;border-color:#D04040;color:#7A1A1A}
+.emo-tab[data-e="sadness"].active{background:#EEF4FF;border-color:#7A9ADA;color:#1A3060}
+.emo-tab[data-e="disgust"].active{background:#F0E8FF;border-color:#8A50CC;color:#3A0A6A}
+.emo-tab[data-e="surprise"].active{background:#E8FFF4;border-color:#2ABA7A;color:#0A4A2A}
+.emo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+@media(max-width:580px){.emo-grid{grid-template-columns:1fr}}
+.emo-card{border-radius:11px;border:1.5px solid;padding:.9rem}
+.ec-level{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem}
+.ec-sub{font-size:.8rem;font-weight:600;margin-bottom:.32rem}
+.ec-scen{font-size:.7rem;color:var(--tx2);line-height:1.55;margin-bottom:.55rem;padding:.45rem .6rem;background:rgba(255,255,255,.55);border-radius:6px;border-left:2.5px solid}
+.ec-rlbl{font-size:.59rem;font-weight:700;text-transform:uppercase;color:#8A1A1A;letter-spacing:.06em;margin-bottom:1px}
+.ec-rtxt{font-size:.69rem;color:#7A1A1A;line-height:1.45;margin-bottom:.55rem}
+.ec-albl{font-size:.59rem;font-weight:700;text-transform:uppercase;color:#1A5A1A;letter-spacing:.06em;margin-bottom:1px}
+.ec-atxt{font-size:.69rem;color:#1A4A1A;line-height:1.45;font-style:italic}
+.ec-joy{background:#FFFCE8;border-color:#E8C020}.ec-joy .ec-level{color:#7A5A00}.ec-joy .ec-sub{color:#5A4000}.ec-joy .ec-scen{border-left-color:#E8C020}
+.ec-fear{background:#EEF3FF;border-color:#5A80D0}.ec-fear .ec-level{color:#1A3A8A}.ec-fear .ec-sub{color:#1A3060}.ec-fear .ec-scen{border-left-color:#5A80D0}
+.ec-anger{background:#FEF0F0;border-color:#D05050}.ec-anger .ec-level{color:#7A1A1A}.ec-anger .ec-sub{color:#5A1010}.ec-anger .ec-scen{border-left-color:#D05050}
+.ec-sadness{background:#EEF4FF;border-color:#7A90C0}.ec-sadness .ec-level{color:#1A3060}.ec-sadness .ec-sub{color:#1A2A50}.ec-sadness .ec-scen{border-left-color:#7A90C0}
+.ec-disgust{background:#F5EEFF;border-color:#8A50C0}.ec-disgust .ec-level{color:#3A0A6A}.ec-disgust .ec-sub{color:#2A0A5A}.ec-disgust .ec-scen{border-left-color:#8A50C0}
+.ec-surprise{background:#EAFFEE;border-color:#2AB07A}.ec-surprise .ec-level{color:#0A4A2A}.ec-surprise .ec-sub{color:#0A3A20}.ec-surprise .ec-scen{border-left-color:#2AB07A}
+
+/* COMPASS */
+.compass-intro{font-size:.81rem;color:var(--tx2);line-height:1.7;margin-bottom:1.1rem}
+.compass-grid{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.5rem}
+.compass-zone{background:var(--surf);border:1px solid var(--bdr);border-radius:11px;overflow:hidden}
+.cz-hdr{padding:.85rem 1.1rem;cursor:pointer;display:flex;align-items:center;gap:.75rem;transition:background .15s}
+.cz-hdr:hover{background:var(--surf2)}
+.compass-zone.cz-open .cz-hdr{background:var(--surf2);border-bottom:1px solid var(--bdr)}
+.cz-num{width:28px;height:28px;border-radius:50%;background:var(--build-bd);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cz-meta{flex:1}
+.cz-title{font-size:.85rem;font-weight:600;color:var(--tx);margin-bottom:.18rem}
+.cz-tagline{font-size:.7rem;color:var(--tx3);font-style:italic}
+.cz-heat{display:flex;align-items:center;gap:.4rem}
+.heat-lbl{font-size:.62rem;font-weight:700;color:var(--tx3);white-space:nowrap}
+.heat-dots{display:flex;gap:2px}
+.hdot{width:9px;height:9px;border-radius:50%;background:var(--bdr2);cursor:pointer;transition:background .15s}
+.hdot.on{background:#E84040}
+.cz-body{padding:1rem 1.1rem;display:none}
+.compass-zone.cz-open .cz-body{display:block}
+.cz-signal{font-size:.78rem;color:var(--tx2);line-height:1.68;margin-bottom:.85rem;padding:.65rem .8rem;border-left:3px solid var(--build-bd);background:var(--build-bg);border-radius:0 7px 7px 0}
+.cz-bp-label{font-size:.65rem;font-weight:700;color:#8A1A1A;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem;margin-top:.7rem}
+.cz-bp-signal{background:#FEE8E8;border:1px solid #EEB0B0;border-radius:7px;padding:.6rem .8rem;font-size:.75rem;color:#7A1A1A;line-height:1.55;margin-bottom:.45rem;font-style:italic}
+.cz-assess{margin-top:.75rem}
+.cz-assess-lbl{font-size:.7rem;font-weight:600;color:var(--tx3);margin-bottom:.35rem}
+textarea.cz-notes{width:100%;min-height:48px;border:1px solid var(--bdr2);border-radius:7px;padding:.5rem .65rem;font-family:'DM Sans',sans-serif;font-size:.76rem;color:var(--tx);background:var(--surf);resize:vertical}
+textarea.cz-notes:focus{outline:none;border-color:var(--build-bd);background:var(--build-bg)}
+
+/* CONVERGING ZONE */
+.czinfo{background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;padding:.85rem 1rem;font-size:.8rem;color:var(--tx2);line-height:1.68;margin-bottom:1.1rem}
+.czinfo strong{color:var(--tx)}
+.cxo-table-wrap{overflow-x:auto;margin-bottom:1.2rem}
+table.cxo-table{width:100%;border-collapse:collapse;font-size:.73rem;min-width:560px}
+table.cxo-table th{background:var(--navy-dk);color:rgba(255,255,255,.82);padding:.5rem .65rem;text-align:left;font-weight:600;font-size:.67rem;letter-spacing:.04em}
+table.cxo-table td{padding:.55rem .65rem;border-bottom:1px solid var(--bdr);vertical-align:top}
+table.cxo-table tr:nth-child(even) td{background:var(--surf2)}
+table.cxo-table .cxo-role{font-weight:700;font-size:.78rem;color:var(--tx)}
+table.cxo-table .cxo-contrib{font-size:.7rem;color:var(--tx2);line-height:1.5}
+table.cxo-table .cxo-domains{display:flex;gap:4px;flex-wrap:wrap}
+table.cxo-table .domain-tag{font-size:.63rem;font-weight:600;padding:.18rem .45rem;border-radius:8px;background:var(--build-bg);color:var(--build-tx);border:1px solid var(--build-bd)}
+
+/* PANORAMIC */
+.panoramic-steps{display:flex;flex-direction:column;gap:.9rem}
+.pstep{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
+.pstep-hdr{padding:.85rem 1.1rem;display:flex;align-items:center;gap:.75rem;cursor:pointer;transition:background .15s}
+.pstep-hdr:hover{background:var(--surf2)}
+.pstep.ps-open .pstep-hdr{background:var(--surf2);border-bottom:1px solid var(--bdr)}
+.pstep-n{width:30px;height:30px;border-radius:50%;background:var(--arc4-bd);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pstep-meta{flex:1}
+.pstep-title{font-size:.88rem;font-weight:600;color:var(--tx)}
+.pstep-time{font-size:.68rem;color:var(--tx3)}
+.pstep-body{padding:1.1rem;display:none}
+.pstep.ps-open .pstep-body{display:block}
+.pstep-body p{font-size:.8rem;color:var(--tx2);line-height:1.68;margin-bottom:.75rem}
+.pstep-body p strong{color:var(--tx)}
+
+.self-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:.85rem}
+.self-table th{background:var(--surf2);padding:.45rem .6rem;text-align:left;font-weight:600;font-size:.68rem;color:var(--tx3);letter-spacing:.04em;border-bottom:1.5px solid var(--bdr)}
+.self-table td{padding:.45rem .6rem;border-bottom:1px solid var(--bdr);vertical-align:top}
+.self-table td.role-col{font-weight:700;font-size:.78rem;color:var(--tx);width:100px}
+.self-table textarea.stx{width:100%;min-height:44px;border:1px solid var(--bdr2);border-radius:6px;padding:.4rem .5rem;font-family:'DM Sans',sans-serif;font-size:.72rem;color:var(--tx);background:var(--surf);resize:vertical}
+.self-table textarea.stx:focus{outline:none;border-color:var(--build-bd);background:var(--build-bg)}
+.self-table select.sdmn{width:100%;border:1px solid var(--bdr2);border-radius:6px;padding:.38rem .45rem;font-family:'DM Sans',sans-serif;font-size:.7rem;color:var(--tx);background:var(--surf);cursor:pointer}
+.self-table select.sdmn:focus{outline:none;border-color:var(--build-bd)}
+
+/* SYNTHESIS */
+.synth{background:linear-gradient(135deg,var(--navy-dk),#2A1A5A);border-radius:13px;padding:1.4rem 1.5rem;color:#fff;margin-top:1.5rem}
+.synth-h{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:.4rem}
+.synth-p{font-size:.8rem;color:rgba(255,255,255,.62);margin-bottom:1.1rem;line-height:1.65}
+.synth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+@media(max-width:560px){.synth-grid{grid-template-columns:1fr}}
+.synth-cell{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:.85rem .95rem}
+.synth-cell-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:.28rem}
+.synth-cell-txt{font-size:.75rem;color:rgba(255,255,255,.88);line-height:1.55}
+
+/* SECTION DIVIDER */
+.sdiv{display:flex;align-items:center;gap:.65rem;margin:1.5rem 0 1.1rem}
+.sdiv::before,.sdiv::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.sdiv span{font-size:.66rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+
+/* INFO / WARN NOTES */
+.info-note{background:var(--build-bg);border:1px solid var(--build-bd);border-radius:8px;padding:.65rem .85rem;font-size:.76rem;color:var(--build-tx);line-height:1.58;margin-bottom:1rem}
+
+/* ARC FOOTER */
+.arc-footer{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.1rem;border-top:1px solid var(--bdr)}
+.afbtn{padding:.6rem 1.15rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+.afbtn.prev{background:var(--surf2);border:1.5px solid var(--bdr);color:var(--tx2)}.afbtn.prev:hover{border-color:var(--bdr2);color:var(--tx)}
+.afbtn.next{background:var(--build-tx);border:none;color:#fff}.afbtn.next:hover{background:#2A1A7A;transform:translateY(-1px);box-shadow:0 4px 12px rgba(60,42,140,.3)}
+.afbtn.next2{background:var(--arc4-bd);border:none;color:#fff}.afbtn.next2:hover{background:#1A9A60;transform:translateY(-1px)}
+
+/* SCARF NARRATIVE SUMMARY */
+.scarf-narrative{background:linear-gradient(135deg,#0F2550,#1E1560);border-radius:12px;padding:1.25rem 1.4rem;margin-top:1.25rem;color:#fff}
+.sn-title{font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.45rem}
+.sn-body{font-size:.8rem;color:rgba(255,255,255,.75);line-height:1.72;margin-bottom:.85rem}
+.sn-tags{display:flex;gap:6px;flex-wrap:wrap}
+.sn-tag{font-size:.67rem;font-weight:600;padding:.22rem .65rem;border-radius:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85)}
+
+/* GENERATE REPORT BUTTON AREA */
+.report-trigger{margin-top:1.5rem;padding:1.25rem 1.4rem;background:var(--surf2);border:1.5px dashed var(--build-bd);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.rt-text{font-size:.8rem;color:var(--tx2);line-height:1.6;flex:1;min-width:200px}
+.rt-text strong{color:var(--tx);display:block;margin-bottom:.2rem}
+.rt-actions{display:flex;gap:.55rem;flex-wrap:wrap}
+.rpt-btn{padding:.6rem 1.1rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;display:flex;align-items:center;gap:.4rem}
+.rpt-btn.primary{background:var(--build-tx);color:#fff}.rpt-btn.primary:hover{background:#2A1A7A;transform:translateY(-1px)}
+.rpt-btn.secondary{background:var(--surf);border:1.5px solid var(--bdr2);color:var(--tx2)}.rpt-btn.secondary:hover{border-color:var(--build-bd);color:var(--build-tx)}
+.rpt-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* REPORT PANEL (hidden on screen, shown when generated / in print) */
+#dna-report{display:none;position:fixed;inset:0;z-index:500;background:#fff;overflow-y:auto;padding:0}
+#dna-report.open{display:block}
+.rp-topbar{background:var(--navy-dk);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.rp-topbar-title{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85)}
+.rp-topbar-actions{display:flex;gap:.5rem}
+.rp-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:'DM Sans',sans-serif;font-size:.73rem;cursor:pointer;border-radius:6px;padding:.3rem .75rem}
+.rp-close:hover{background:rgba(255,255,255,.2)}
+.rp-print{background:var(--build-bd);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:600;cursor:pointer;border-radius:6px;padding:.3rem .8rem}
+.rp-email{background:var(--arc4-bd);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:.73rem;font-weight:600;cursor:pointer;border-radius:6px;padding:.3rem .8rem}
+.rp-body{max-width:760px;margin:0 auto;padding:2.5rem 2rem 4rem;font-family:'DM Sans',sans-serif}
+.rp-masthead{border-bottom:3px solid var(--build-bd);padding-bottom:1.2rem;margin-bottom:1.8rem}
+.rp-logo-line{font-size:.68rem;font-weight:700;color:var(--build-tx);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem}
+.rp-doc-title{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--navy-dk);line-height:1.2;margin-bottom:.35rem}
+.rp-doc-sub{font-size:.8rem;color:var(--tx3)}
+.rp-org-line{margin-top:.65rem;font-size:.78rem;color:var(--tx2)}
+.rp-org-line span{font-weight:600;color:var(--tx)}
+.rp-section{margin-bottom:2rem}
+.rp-sec-hdr{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--bdr)}
+.rp-sec-num{width:26px;height:26px;border-radius:50%;background:var(--build-bd);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rp-sec-title{font-size:.92rem;font-weight:600;color:var(--tx)}
+.rp-trait-row{display:grid;grid-template-columns:140px 70px 1fr 1fr;gap:.65rem;align-items:start;padding:.55rem 0;border-bottom:1px solid var(--bdr)}
+.rp-trait-row:last-child{border-bottom:none}
+.rp-t-name{font-size:.78rem;font-weight:600;color:var(--tx)}
+.rp-t-dna{font-size:.72rem;color:var(--tx2);line-height:1.5}
+.rp-t-risk{font-size:.7rem;color:#8A1A1A;line-height:1.45;padding:.3rem .5rem;background:#FEE8E8;border-radius:5px}
+.rp-t-resp{font-size:.7rem;color:#0A4A2A;line-height:1.45;padding:.3rem .5rem;background:#E8F8F0;border-radius:5px}
+.rp-scarf-row{display:grid;grid-template-columns:110px 100px 1fr;gap:.65rem;align-items:start;padding:.55rem 0;border-bottom:1px solid var(--bdr)}
+.rp-scarf-row:last-child{border-bottom:none}
+.rp-sd-name{font-size:.78rem;font-weight:600;color:var(--tx)}
+.rp-sd-signs{font-size:.7rem;color:var(--tx2);line-height:1.5}
+.rp-sd-actions{font-size:.7rem;color:#0A4A2A;line-height:1.5}
+.rp-synthesis{background:var(--build-bg);border:1.5px solid var(--build-bd);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1rem}
+.rp-synth-title{font-size:.82rem;font-weight:600;color:var(--build-tx);margin-bottom:.45rem}
+.rp-synth-body{font-size:.77rem;color:var(--tx2);line-height:1.7}
+.rp-impl-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.75rem}
+.rp-impl-cell{border-radius:8px;padding:.7rem .85rem}
+.rp-impl-risk{background:#FEE8E8;border:1px solid #EEB0B0}
+.rp-impl-design{background:#E8F0FF;border:1px solid #A0B8EE}
+.rp-impl-watch{background:#FFF8E0;border:1px solid #E8C880}
+.rp-impl-strength{background:#E8F8F0;border:1px solid #90D0A8}
+.rp-impl-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.28rem}
+.rp-impl-risk .rp-impl-lbl{color:#8A1A1A}.rp-impl-design .rp-impl-lbl{color:#1A3A8A}.rp-impl-watch .rp-impl-lbl{color:#7A5A00}.rp-impl-strength .rp-impl-lbl{color:#0A4A2A}
+.rp-impl-txt{font-size:.72rem;line-height:1.5;color:var(--tx2)}
+.rp-commit-box{border:1.5px solid var(--bdr2);border-radius:8px;padding:.85rem 1rem;margin-bottom:.7rem;background:var(--surf)}
+.rp-commit-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:.5rem}
+.rp-commit-field{min-height:72px;border:1px solid var(--bdr2);border-radius:6px;padding:.55rem .7rem;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--tx);background:var(--surf2);line-height:1.7;outline:none;white-space:pre-wrap;word-break:break-word}
+.rp-commit-field:empty::before{content:attr(data-placeholder);color:var(--tx3);pointer-events:none}
+.rp-commit-field:focus{border-color:var(--build-bd);background:var(--build-bg)}
+.rp-commit-field:focus:empty::before{color:var(--bdr2)}
+.rp-footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
+.rp-footer-brand{font-size:.68rem;color:var(--tx3)}
+.rp-footer-brand strong{color:var(--build-tx)}
+.rp-footer-lens{font-size:.68rem;color:var(--tx3)}
+.copy-toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--navy-dk);color:#fff;font-size:.78rem;font-weight:500;padding:.5rem 1.25rem;border-radius:20px;z-index:600;opacity:0;transition:opacity .3s;pointer-events:none}
+.copy-toast.show{opacity:1}
+
+/* ── PRINT STYLES ── */
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .topnav,.arc-nav,.main,.copy-toast{display:none!important}
+  #dna-report{display:block!important;position:static!important;overflow:visible!important}
+  .rp-topbar{display:none!important}
+  .rp-body{padding:1cm 1.5cm;max-width:100%}
+  .rp-doc-title{font-size:1.6rem}
+  .rp-section{page-break-inside:avoid}
+  .rp-commit-box{page-break-inside:avoid;break-inside:avoid}
+  .rp-commit-field{
+    min-height:0;
+    height:auto;
+    overflow:visible;
+    white-space:pre-wrap;
+    border:1px solid #ccc;
+    background:#fafafa;
+    -webkit-print-color-adjust:exact
+  }
+  .rp-commit-field:empty{min-height:80px;border:1px dashed #ccc}
+  .rp-commit-field:empty::before{content:attr(data-placeholder);color:#aaa}
+  .rp-impl-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
 <body>
 
-<div class="topnav">
-  <div class="nav-links">
-    <a href="index.html" class="nav-btn">Home</a>
-    <a href="build.html" class="nav-btn active">Build</a>
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-left">
+    <button class="back-btn" onclick="window.location='BUILD_index.html'">← BUILD</button>
+    <span class="nav-crumb">Base Camp 1: Direction / <span>Lens 1 — Aligning Heart & Mind</span></span>
+  </div>
+  <span class="lens-pip">LENS 1 / 11</span>
+</nav>
+
+<!-- LENS HERO -->
+<div class="lens-hero">
+  <div class="hero-inner">
+    <div class="hero-camp">Base Camp 1: Direction — Session 1.1</div>
+    <h1 class="hero-h1"><em>Aligning</em> Heart & Mind</h1>
+    <p class="hero-p">Before any strategy can be executed, it must travel through people. Not through systems, not through dashboards — through people. This lens is the first for a reason: before you can lead strategy, you must understand the human terrain you are leading it through. The work you do here determines the quality of every decision you make in the lenses ahead.</p>
+    <div class="hero-chips">
+      <span class="chip">⏱ 3h40</span>
+      <span class="chip">👥 Full CXO Team</span>
+      <span class="chip">4 Arcs</span>
+      <span class="chip">Awareness · Intelligence · Extrapolating · Converging Zone</span>
+    </div>
+  </div>
+</div>
+
+<!-- ARC NAV -->
+<div class="arc-nav">
+  <div class="arc-nav-inner">
+    <div class="arc-tab active" data-arc="1" onclick="switchArc(1)"><span class="anum">1</span>AWARENESS — What</div>
+    <div class="arc-tab" data-arc="2" onclick="switchArc(2)"><span class="anum">2</span>INTELLIGENCE — Why</div>
+    <div class="arc-tab" data-arc="3" onclick="switchArc(3)"><span class="anum">3</span>EXTRAPOLATING — Where</div>
+    <div class="arc-tab" data-arc="4" onclick="switchArc(4)"><span class="anum">4</span>CONVERGING ZONE — How Collective</div>
   </div>
 </div>
 
 <div class="main">
 
-  <div class="sec-hdr h-build">
-    <div class="sec-title">Build</div>
-    <div class="sec-sub">Define and structure your strategy clearly</div>
-  </div>
-
-  <!-- STEP NAV -->
-  <div class="step-nav2">
-    <button class="step-btn2 active">WHAT</button>
-    <button class="step-btn2">WHY</button>
-    <button class="step-btn2">HOW</button>
-    <button class="step-btn2">WHEN</button>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="info-box">
-    <div class="info-title">Strategy Input</div>
-    <div class="info-sub">
-      Capture the core elements of your strategy. This becomes the source for execution.
+<!-- ══════════════════
+     ARC 1: AWARENESS
+══════════════════════ -->
+<div class="arc-sec active" id="arc-1">
+  <div class="arc-hdr a1">
+    <div class="arc-lbl">Arc 1 — Awareness · 0:00–0:55</div>
+    <div class="arc-hdr-h">What is Aligning Heart and Mind?</div>
+    <div class="arc-hdr-p">Strategy moves through people before it moves through plans. Every executive at this table arrives already carrying a personality profile, a set of emotional defaults, and a specific set of personal motives. These are not obstacles — they are the terrain. Your task in this arc is to name that terrain accurately for your organisation, so that alignment is designed rather than assumed.</div>
+    <div class="arc-chips">
+      <span class="arc-chip">5 Principles of Alignment</span>
+      <span class="arc-chip">OCEANAL Team Profile</span>
+      <span class="arc-chip">SCARF Climate Observation</span>
     </div>
   </div>
 
-  <div class="fld-lbl">WHAT — Scope & Domain</div>
-  <textarea placeholder="What exactly are you doing? What are you deliberately NOT doing?"></textarea>
-
-  <div class="fld-lbl">WHY — Strategic Intent</div>
-  <textarea placeholder="Why does this strategy exist? What is the differentiating logic?"></textarea>
-
-  <div class="fld-lbl">HOW — Operating Model</div>
-  <textarea placeholder="How will you deliver it? Capabilities, processes, partnerships."></textarea>
-
-  <div class="fld-lbl">WHEN — Sequencing</div>
-  <textarea placeholder="What happens in what order? Phases, milestones, timing."></textarea>
-
-  <div class="btn-row">
-    <button class="btn-p">Save</button>
-    <button class="btn-s">Reset</button>
+  <!-- 5 PRINCIPLES -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('principles')">
+      <div class="ticon" style="background:var(--build-bg)">📐</div>
+      <div class="thdr-info">
+        <div class="tnum">Foundation</div>
+        <div class="ttitle">Five Principles of Aligning Heart and Mind</div>
+        <div class="tsub">The operating logic behind execution alignment — why this is the first lens</div>
+      </div>
+      <span class="ttog open" id="tog-principles">▴</span>
+    </div>
+    <div class="tbody" id="body-principles">
+      <div class="info-note">These five principles establish the human operating system that enables strategy to move from intention to execution. Read them as a leadership team. Discuss where your organisation sits on each one <em>before</em> completing the diagnostic tools that follow.</div>
+      <div class="principle-grid" id="principle-grid"></div>
+    </div>
   </div>
 
+  <!-- OCEANAL -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('oceanal')">
+      <div class="ticon" style="background:var(--build-bg)">🧠</div>
+      <div class="thdr-info">
+        <div class="tnum">Tool 1 — OCEANAL Assessment</div>
+        <div class="ttitle">Build Your Organisation's Leadership Behavioural Profile</div>
+        <div class="tsub">Score your actual team → compute team DNA → surface execution guardrails</div>
+      </div>
+      <span class="ttog" id="tog-oceanal">▾</span>
+    </div>
+    <div class="tbody" id="body-oceanal" style="display:none">
+      <div class="data-collect-note">
+        <div class="dcn-title">⚙ How to collect scores across your team</div>
+        <div style="font-size:.78rem;color:var(--tx2);line-height:1.65">Each CXO scores themselves. There are two practical approaches — choose the one that fits your session format:</div>
+        <div class="dcn-options">
+          <div class="dcn-opt">
+            <div class="dcn-opt-title">Option A — Live session input</div>
+            <div class="dcn-opt-body">Each person calls out their self-score for each trait as the group works through the table together. The facilitator (or any team member) enters the scores in this shared view. Recommended for in-person sessions where open discussion of each trait is part of the process.</div>
+          </div>
+          <div class="dcn-opt">
+            <div class="dcn-opt-title">Option B — Pre-session individual scoring</div>
+            <div class="dcn-opt-body">Each CXO completes the printed or Excel pre-assessment individually before the session. Scores are transferred into this tool at the start of Arc 1 for immediate team DNA computation. Recommended when anonymity or independent reflection is preferred before group discussion.</div>
+          </div>
+        </div>
+      </div>
+      <div class="oceanal-intro">
+        <strong>Scoring guide:</strong> Rate yourself on each trait using the 1–5 scale. Score <strong>1–2 = Low</strong> (the low-end description applies to you), <strong>3 = Balanced</strong> (you operate in the middle range), <strong>4–5 = High</strong> (the high-end description strongly applies to you). Score your honest default behaviour, not your aspirational self. Only roles present and scored are included in the team profile.
+      </div>
+      <div class="score-tbl-wrap"><table class="stbl" id="oceanal-tbl"></table></div>
+      <button class="calc-btn" onclick="calcOceanal()">▶ Compute Our Team Profile</button>
+      <div class="result-block" id="oceanal-results"></div>
+      <div class="dna-implications" id="dna-implications" style="display:none">
+        <div class="dna-impl-h">What Your Team DNA Means for the Strategy BUILD Process</div>
+        <div class="dna-impl-p">Your aggregate personality profile creates predictable patterns in how this team will navigate strategy design. These are not opinions — they are structural implications drawn directly from your scored profile. Address the risks before they become Burning Platforms in later lenses.</div>
+        <div class="dna-impl-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCARF -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('scarf')">
+      <div class="ticon" style="background:#E8F0FF">🔍</div>
+      <div class="thdr-info">
+        <div class="tnum">Tool 2 — SCARF Climate Diagnostic</div>
+        <div class="ttitle">Observe and Name Your Organisation's Live Climate Signals</div>
+        <div class="tsub">Log the behaviours you are currently observing → identify which social threat domains are activated</div>
+      </div>
+      <span class="ttog" id="tog-scarf">▾</span>
+    </div>
+    <div class="tbody" id="body-scarf" style="display:none">
+      <div class="scarf-intro">The SCARF model identifies five social conditions that trigger emotional responses during change. The human brain processes social change using the same threat circuitry as physical danger — any new goal, task, system, leader, or way of working is first evaluated emotionally, before it is evaluated rationally. <br><br><strong>Your task:</strong> Review the 25 observable signs below. For each behaviour you are currently seeing in your organisation or leadership climate, click to log it. The system will show you which domains are most activated — and what you must address before your strategy can move freely through the organisation.</div>
+      <div class="scarf-domains">
+        <div class="scarf-d sd-S"><div class="sd-letter">S</div><div class="sd-name">Status</div></div>
+        <div class="scarf-d sd-C"><div class="sd-letter">C</div><div class="sd-name">Certainty</div></div>
+        <div class="scarf-d sd-A"><div class="sd-letter">A</div><div class="sd-name">Autonomy</div></div>
+        <div class="scarf-d sd-R"><div class="sd-letter">R</div><div class="sd-name">Relatedness</div></div>
+        <div class="scarf-d sd-F"><div class="sd-letter">F</div><div class="sd-name">Fairness</div></div>
+      </div>
+      <div class="obs-list" id="scarf-list"></div>
+      <div class="scarf-summary" id="scarf-summary"></div>
+      <div id="scarf-narrative-wrap"></div>
+    </div>
+  </div>
+
+  <!-- GENERATE REPORT TRIGGER -->
+  <div class="report-trigger" id="report-trigger">
+    <div class="rt-text">
+      <strong>Generate Lens 1 — Awareness Report</strong>
+      Complete both the OCEANAL Team Profile and the SCARF Climate Diagnostic above, then generate your organisation's Team DNA Report. The report synthesises personality + climate into a unified leadership brief and is ready to print as PDF or share by email.
+    </div>
+    <div class="rt-actions">
+      <button class="rpt-btn secondary" id="btn-copy-report" onclick="emailReport()" disabled>✉ Copy for Email</button>
+      <button class="rpt-btn primary" id="btn-gen-report" onclick="generateReport()" disabled>▶ Generate Team DNA Report</button>
+    </div>
+  </div>
+
+  <div class="arc-footer">
+    <span></span>
+    <button class="afbtn next" onclick="switchArc(2)">Arc 2: Intelligence — Why →</button>
+  </div>
 </div>
+
+<!-- ══════════════════
+     ARC 2: INTELLIGENCE
+══════════════════════ -->
+<div class="arc-sec" id="arc-2">
+  <div class="arc-hdr a2">
+    <div class="arc-lbl">Arc 2 — Intelligence · 0:55–1:40</div>
+    <div class="arc-hdr-h">Why does Heart & Mind Alignment determine execution outcomes?</div>
+    <div class="arc-hdr-p">Alignment of hearts and minds is the ignition point of execution — the moment where strategy transitions from a document describing intent into a system capable of producing movement. This arc establishes why this matters operationally, introduces the Commitment vs Compliance distinction that will shape your leadership architecture, and equips you with the ACE-IT behavioural framework and the Emotional Climate Thermometer as your live diagnostic instruments.</div>
+    <div class="arc-chips">
+      <span class="arc-chip">The Ignition Point Logic</span>
+      <span class="arc-chip">Compliance vs Commitment</span>
+      <span class="arc-chip">ACE-IT Anchor Behaviours</span>
+      <span class="arc-chip">Emotional Climate Thermometer</span>
+    </div>
+  </div>
+
+  <!-- IGNITION POINT -->
+  <div class="ignition-block">
+    <div class="ign-title">The Ignition Point of Strategy Execution</div>
+    <div class="ign-p">A strategy document contains strategic <em>potential</em> — direction, intent, and ambition. Execution begins only when an individual decides: <em>"This matters to me. I am willing to invest energy in making this succeed."</em> Until that moment occurs across the organisation, strategy remains theoretical. Aligning Hearts and Minds activates the human energy required to convert intention into action. Three logics explain why this lens determines execution outcomes:</div>
+    <div class="ign-grid">
+      <div class="ign-card">
+        <div class="ign-card-title">Potential → Kinetic Energy</div>
+        <div class="ign-card-p">Strategy at rest is potential energy only. No system executes itself. The human decision to invest is the conversion point from intention to movement.</div>
+      </div>
+      <div class="ign-card">
+        <div class="ign-card-title">Commitment vs Compliance</div>
+        <div class="ign-card-p">Compliance produces supervised output. Commitment produces self-driven momentum. Only alignment achieves the latter — and only the latter survives when leadership attention shifts.</div>
+      </div>
+      <div class="ign-card">
+        <div class="ign-card-title">The Iceberg Below the Waterline</div>
+        <div class="ign-card-p">What is visible (behaviour) is shaped by what is emotional (how the strategy is experienced), which is shaped by what is cognitive (how it is interpreted). Leaders who address only the visible layer change nothing durable.</div>
+      </div>
+      <div class="ign-card">
+        <div class="ign-card-title">The PEC Funnel</div>
+        <div class="ign-card-p">Platform → Emotion → Cognition. The execution platform people stand on determines their emotional state. Their emotional state determines the quality of their thinking. Stabilise the platform first.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PEC FUNNEL VISUAL -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('pec')">
+      <div class="ticon" style="background:var(--build-bg)">📊</div>
+      <div class="thdr-info">
+        <div class="tnum">Model — The PEC Funnel</div>
+        <div class="ttitle">Platform → Emotion → Cognition</div>
+        <div class="tsub">Diagnose where your organisation's alignment failure is occurring</div>
+      </div>
+      <span class="ttog" id="tog-pec">▾</span>
+    </div>
+    <div class="tbody" id="body-pec" style="display:none">
+      <div class="info-note">The PEC Funnel shows the causal chain between execution context and decision quality. When organisations struggle with poor decisions, they typically intervene at the Cognition layer (retraining, new processes, better information). But the root cause is usually at the Platform layer — the social, structural, and emotional conditions in which the thinking is happening. Fix the platform first.</div>
+      <div class="pec-visual">
+        <div class="pec-layer pec-l1"><span class="pec-label">Platform</span>The execution conditions your people stand on — clarity, safety, resources, leadership signals</div>
+        <div style="font-size:.8rem;color:var(--tx3);margin:3px 0">↓ shapes</div>
+        <div class="pec-layer pec-l2"><span class="pec-label">Emotion</span>How the strategy and its demands are being experienced — fear, enthusiasm, fatigue, trust</div>
+        <div style="font-size:.8rem;color:var(--tx3);margin:3px 0">↓ determines</div>
+        <div class="pec-layer pec-l3"><span class="pec-label">Cognition</span>The quality of interpretation, decision-making, and problem-solving available to the team</div>
+      </div>
+      <div class="pec-caption">Unacknowledged emotional states silently override rational plans.<br>The mind shapes interpretation of what is at hand. The heart shapes the lived experience of it.</div>
+    </div>
+  </div>
+
+  <!-- COMPLIANCE / COMMITMENT SPECTRUM -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('cspec')">
+      <div class="ticon" style="background:var(--arc2-bg)">⚖️</div>
+      <div class="thdr-info">
+        <div class="tnum">Organisation Diagnostic — Compliance vs Commitment</div>
+        <div class="ttitle">Assess Where Your Organisation Currently Operates</div>
+        <div class="tsub">Rate each dimension for your current execution environment</div>
+      </div>
+      <span class="ttog" id="tog-cspec">▾</span>
+    </div>
+    <div class="tbody" id="body-cspec" style="display:none">
+      <div class="info-note">Compliance is execution through external pressure. Commitment is execution through internal ownership. Organisations can drive both — but only commitment delivers resilience, discretionary effort, and adaptive problem-solving. Rate the sliders honestly for your organisation today. This is not a benchmark — it is a starting point for design.</div>
+      <div class="cc-spectrum">
+        <div class="cc-title">Compliance dimension (1 = fully compliance-driven, 10 = no reliance on external pressure needed)</div>
+        <div id="cc-sliders"></div>
+        <div class="cc-feedback" id="cc-feedback">Move the sliders to assess your organisation's current state.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACE-IT -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('aceit')">
+      <div class="ticon" style="background:#E8F8F0">✅</div>
+      <div class="thdr-info">
+        <div class="tnum">Tool 3 — ACE-IT Framework</div>
+        <div class="ttitle">Anchor Behaviours That Make Alignment Visible and Measurable</div>
+        <div class="tsub">The five universally observable behaviours that confirm alignment is genuinely present</div>
+      </div>
+      <span class="ttog" id="tog-aceit">▾</span>
+    </div>
+    <div class="tbody" id="body-aceit" style="display:none">
+      <div class="info-note">ACE-IT provides the behavioural signals that confirm whether alignment is genuinely present. Without observable behaviour, alignment remains theoretical. These five anchor behaviours are independent of your organisation's stated values — they are the execution standard regardless of what your values framework says.</div>
+      <table class="aceit-table" id="aceit-tbl"></table>
+      <div class="sdiv"><span>Log observable signs in your organisation right now</span></div>
+      <div class="info-note">For each ACE-IT behaviour, check the box next to any observable sign you are currently seeing in your organisation. This builds your baseline — the behaviours already present, and the gaps you must design into your strategy process.</div>
+    </div>
+  </div>
+
+  <!-- EMOTIONAL CLIMATE THERMOMETER -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('emo')">
+      <div class="ticon" style="background:#FFF0E8">🌡️</div>
+      <div class="thdr-info">
+        <div class="tnum">Tool 4 — Emotional Climate Thermometer</div>
+        <div class="ttitle">18-Scenario Leadership Response Playbook</div>
+        <div class="tsub">Identify the live emotion, read the execution risk, apply the precise leadership response</div>
+      </div>
+      <span class="ttog" id="tog-emo">▾</span>
+    </div>
+    <div class="tbody" id="body-emo" style="display:none">
+      <div class="scarf-intro">Strategy always lands into an emotional climate before it lands into action. Each of the six primary emotions operates across three intensity levels, creating 18 distinct climate scenarios. Each scenario carries a specific execution risk if left unaddressed, and a specific leadership response that restores productive engagement.<br><br><strong>Your task:</strong> Use this playbook as a live diagnostic during your strategy sessions. When you observe a pattern in the room, navigate to the relevant emotion and intensity level. Read the risk. Apply the response.</div>
+      <div class="emo-tabs" id="emo-tabs"></div>
+      <div id="emo-content"></div>
+    </div>
+  </div>
+
+  <div class="arc-footer">
+    <button class="afbtn prev" onclick="switchArc(1)">← Arc 1: Awareness</button>
+    <button class="afbtn next" onclick="switchArc(3)">Arc 3: Extrapolating →</button>
+  </div>
+</div>
+
+<!-- ══════════════════
+     ARC 3: EXTRAPOLATING
+══════════════════════ -->
+<div class="arc-sec" id="arc-3">
+  <div class="arc-hdr a3">
+    <div class="arc-lbl">Arc 3 — Extrapolating · 1:40–2:25</div>
+    <div class="arc-hdr-h">Where are the alignment hot zones across your organisation?</div>
+    <div class="arc-hdr-p">Extrapolating is the discipline of locating where in your organisation alignment between hearts and minds is required, where it is beginning to fail, and where the symptoms of misalignment are most visible. These zones consistently appear across seven domains — the COMPASS. Your task is to map your organisation's current heat level in each domain and identify whether you are managing a High Flammable zone or already operating from a Burning Platform.</div>
+    <div class="arc-chips">
+      <span class="arc-chip">COMPASS — 7 High Flammable Zones</span>
+      <span class="arc-chip">Burning Platforms Distinction</span>
+      <span class="arc-chip">Hot Zone Mapping — Your Organisation</span>
+    </div>
+  </div>
+
+  <div class="info-note">
+    <strong>High Flammables vs Burning Platforms:</strong> High Flammables are leverage points where human interpretation and emotional state have a disproportionate impact on performance. When alignment is strong, they amplify performance. When alignment is weak, they escalate. Burning Platforms are High Flammables that have remained misaligned long enough for the consequences to become visible and costly. At a Burning Platform, staying still is more dangerous than change — alignment work becomes corrective, not developmental.
+  </div>
+
+  <div class="compass-intro">
+    <strong>Your task:</strong> For each of the seven COMPASS domains, expand the zone, read the organisational signal narrative, and rate the current heat level in your organisation (1 dot = emerging risk, 5 dots = burning platform). Add your own observations about where misalignment is showing up. This map will feed directly into your Converging Zone work in Arc 4.
+  </div>
+
+  <div class="compass-grid" id="compass-grid"></div>
+
+  <div class="arc-footer">
+    <button class="afbtn prev" onclick="switchArc(2)">← Arc 2: Intelligence</button>
+    <button class="afbtn next" onclick="switchArc(4)">Arc 4: Converging Zone →</button>
+  </div>
+</div>
+
+<!-- ══════════════════
+     ARC 4: CONVERGING ZONE
+══════════════════════ -->
+<div class="arc-sec" id="arc-4">
+  <div class="arc-hdr a4">
+    <div class="arc-lbl">Arc 4 — Converging Zone · 3:05–3:30</div>
+    <div class="arc-hdr-h">How does your CXO team create the Panoramic Convergent Zone?</div>
+    <div class="arc-hdr-p">The Converging Zone transforms functional expertise into coordinated leadership judgment. Without convergence, your organisation receives multiple interpretations of strategy — causing instability across the seven COMPASS domains. With convergence, your executive team operates as a single leadership system. This arc is the collective intelligence moment of Lens 1: you move from individual self-awareness to a shared map of how your roles jointly stabilise the organisation's alignment terrain.</div>
+    <div class="arc-chips">
+      <span class="arc-chip">CXO Convergence Table</span>
+      <span class="arc-chip">Panoramic Application — 3 Steps</span>
+      <span class="arc-chip">Build Your Organisation's Convergence Map</span>
+    </div>
+  </div>
+
+  <!-- CXO CONVERGENCE TABLE -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('cxo')">
+      <div class="ticon" style="background:var(--arc4-bg)">🎯</div>
+      <div class="thdr-info">
+        <div class="tnum">Reference — CXO Convergence Map</div>
+        <div class="ttitle">How Each CXO Role Stabilises the Seven COMPASS Domains</div>
+        <div class="tsub">Understand your role's convergence responsibility before building your organisation's specific map</div>
+      </div>
+      <span class="ttog" id="tog-cxo">▾</span>
+    </div>
+    <div class="tbody" id="body-cxo" style="display:none">
+      <div class="czinfo">Each domain is influenced by multiple executive functions simultaneously. Alignment cannot be stabilised by any single leader — it requires executive convergence. Review your role and the roles of your colleagues. Then, in the Panoramic Application below, you will build your organisation's specific convergence map.</div>
+      <div class="cxo-table-wrap"><table class="cxo-table" id="cxo-tbl"></table></div>
+    </div>
+  </div>
+
+  <!-- PANORAMIC APPLICATION -->
+  <div class="tool-block">
+    <div class="tool-hdr" onclick="togTool('panoramic')">
+      <div class="ticon" style="background:var(--arc4-bg)">🔭</div>
+      <div class="thdr-info">
+        <div class="tnum">Exercise — Panoramic Application</div>
+        <div class="ttitle">Build Your Organisation's Convergence Map</div>
+        <div class="tsub">Three steps: self-reflection → perspective exchange → collective convergence</div>
+      </div>
+      <span class="ttog" id="tog-panoramic">▾</span>
+    </div>
+    <div class="tbody" id="body-panoramic" style="display:none">
+      <div class="panoramic-steps" id="pano-steps"></div>
+    </div>
+  </div>
+
+  <!-- LENS 1 SYNTHESIS -->
+  <div class="synth">
+    <div class="synth-h">Lens 1 Complete — Your Organisation's Alignment Foundation</div>
+    <div class="synth-p">You have mapped the human terrain your strategy must travel through. This is not background context — it is the first execution system. Everything you build in the lenses ahead rests on the clarity of what you have surfaced here.</div>
+    <div class="synth-grid">
+      <div class="synth-cell">
+        <div class="synth-cell-lbl">What you now know</div>
+        <div class="synth-cell-txt">Your team's aggregate behavioural DNA, the live SCARF climate signals, and the emotional dynamics currently shaping how your leadership team interprets and experiences the strategy process.</div>
+      </div>
+      <div class="synth-cell">
+        <div class="synth-cell-lbl">What you have mapped</div>
+        <div class="synth-cell-txt">The seven COMPASS hot zones with your organisation's current heat rating — distinguishing High Flammables you can leverage from Burning Platforms requiring corrective intervention.</div>
+      </div>
+      <div class="synth-cell">
+        <div class="synth-cell-lbl">What you must now design</div>
+        <div class="synth-cell-txt">The ACE-IT behavioural architecture and the convergence commitments that ensure your CXO team sends one coherent signal across all seven domains as you move into Lens 2: Strategy Visioning & SiP.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arc-footer">
+    <button class="afbtn prev" onclick="switchArc(3)">← Arc 3: Extrapolating</button>
+    <button class="afbtn next2" onclick="window.location='lens_02_visioning.html'">Proceed to Lens 2 →</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+/* ════════════════════ DATA ════════════════════ */
+
+var PRINCIPLES=[
+  {n:'1',title:'Strategy Moves Through People',body:'Strategy does not enter an organisation as a document — it enters through the people responsible for interpreting and acting on it. Before strategy becomes operational activity, it passes through two human filters: Cognition (how individuals interpret what the strategy means) and Emotion (how individuals experience the strategy and the conditions around it). These internal interpretations determine whether strategy produces clarity or confusion, commitment or compliance, momentum or hesitation. Alignment of mind and heart is therefore not optional — it is the first execution system.',tag:'Foundation Principle'},
+  {n:'2',title:'Misalignment Fragments Effort',body:'When interpretation and emotional experience are not aligned, the organisation does not stop working — effort begins to fragment. Departments pursue competing priorities. Cross-functional friction increases. Duplicated work emerges. Decisions slow down. Everyone remains active, yet the organisation moves with split effort. Low-alignment organisations experience 41% lower productivity and 48% higher turnover. This drift is dangerous because it is gradual, it is rationalised, and it is expensive.',tag:'The Cost of Skipping Lens 1'},
+  {n:'3',title:'Alignment Must Be Designed',body:'Alignment rarely emerges naturally. It must be intentionally designed through structured interventions that make interpretation and emotional climate visible. The OCEANAL Assessment surfaces the psychological tendencies influencing executive decision-making. The Emotional Climate Assessment identifies the prevailing state of being through which strategy is being experienced. The SCARF Diagnostic identifies the live social threat domains shaping behaviour. These are instruments — not theory — for designing alignment deliberately.',tag:'Tools Available to You'},
+  {n:'4',title:'Human Reactions Are Predictable',body:'Whenever new goals, priorities, structures, or expectations are introduced, individuals instinctively evaluate the impact on their personal security and identity. The SCARF model identifies the five social conditions that trigger emotional responses during change: Status, Certainty, Autonomy, Relatedness, and Fairness. The human brain processes social change using the same threat circuitry as physical danger. Understanding this allows leaders to design for human predictability rather than being surprised by it.',tag:'The Behavioural Architecture'},
+  {n:'5',title:'Execution Must Be Visible in Behaviour',body:'Strategic alignment ultimately becomes visible through behaviour. The five ACE-IT anchor behaviours — Accountability, Commitment, Engagement, Integrity, Transparency — are the observable standard against which alignment can be measured. Without observable behaviour, alignment remains theoretical. With behavioural standards, alignment becomes visible, measurable, and sustainable. These behaviours are independent of your organisation\'s stated values: they are the execution standard regardless of your values framework.',tag:'ACE-IT Anchor Behaviours'}
+];
+
+var TRAITS=[
+  {id:'O',n:'Openness',d:'Curiosity, creativity, adaptability to new approaches'},
+  {id:'C',n:'Conscientiousness',d:'Discipline, planning, follow-through on commitments'},
+  {id:'E',n:'Extraversion',d:'Outward energy, communication, collaboration comfort'},
+  {id:'A',n:'Agreeableness',d:'Harmony orientation, conflict management, cooperation'},
+  {id:'ES',n:'Emotional Stability',d:'Composure under pressure, emotional resilience'},
+  {id:'VA',n:'Values Alignment',d:'Consistency between stated values and lived behaviour'},
+  {id:'LO',n:'Learning Orientation',d:'Growth mindset, openness to feedback, skill development'}
+];
+var ROLES=['CEO','CFO','CHRO','COO','CTO','CMO','CCO','CRO'];
+
+var GRD={
+  O:{Low:{dna:'Prefers safe and familiar ideas. Waits for certainty before acting. May miss external shifts.',risk:'Decisions stall waiting for certainty; teams default to legacy approaches; market shifts recognised too late.',resp:'Introduce a 70% certainty rule. Force strategic reframing via clean-slate questions. Commission one "What If" scenario memo each cycle.',rout:'Clarity Trial; Zero-Base Huddle; Trend Rotation'},
+    Balanced:{dna:'Mixes routine and creativity well. Tests ideas when supported by evidence. Open to learning.',risk:'Avoidance of discomfort over time; evidence-heavy culture slows experimentation; improvements stay incremental.',resp:'Mandate one deliberately uncomfortable experiment per cycle. Require one judgement-based pilot. Ask what a 10× outcome would require.',rout:'The Stretch Sync; The Intuition Log; The Moonshot Minute'},
+    High:{dna:'Enjoys new approaches. Quick to adapt. Multiple ideas compete simultaneously.',risk:'Too many ideas fragment focus; initiatives start without completing; priorities blur.',resp:'Enforce One In, One Out rule. Temporarily freeze new starts. Re-anchor every pivot to agreed strategic intent.',rout:'48-Hour Validation; Finish Line Friday; The Anchor Check'}},
+  C:{Low:{dna:'Struggles to stay organised. May start tasks but not finish. Delivery is unpredictable.',risk:'Commitments missed; output quality varies; outcomes lack ownership.',resp:'Introduce a RAG status board. Mandate peer-review before closure. Assign a single named owner per key result.',rout:'Monday Commit; Quality Spot-Check; Ownership Stand-Up'},
+    Balanced:{dna:'Usually dependable but feels stress under sustained pressure. Tries to stay disciplined across many tasks.',risk:'Sustained workload erodes reliability; critical steps bypassed under pressure; long-term health traded for short-term delivery.',resp:'Actively rebalance demand to real capacity. Mandate checklists for high-risk tasks. Protect dedicated clean-up time.',rout:'Load Audit; Step-Check; Health Check'},
+    High:{dna:'Very organised and structured. Wants things done perfectly and on time.',risk:'Over-planning delays action; perfectionism blocks "good enough"; teams freeze when plans change.',resp:'Explicitly authorise Plan B approaches. Impose strict time limits on planning. Define Minimum Viable Result.',rout:'Pivot Sprint; Speed-to-Action; MVR Audit'}},
+  E:{Low:{dna:'Quiet and reflective. Prefers small groups or time to think before speaking.',risk:'Critical insights remain unspoken; stress causes withdrawal; information is pulled not pushed.',resp:'Begin meetings with silent written input. Schedule intentional 1-on-1 reconnection. Enforce push-based reporting.',rout:'Digital Ink-Well; Pulse Check; Flash Update'},
+    Balanced:{dna:'Comfortable mixing with people. Can balance talking and listening well.',risk:'Meetings drift into social discussion; consensus delays decisions; purpose slips.',resp:'Restrict updates to blockers, decisions, actions only. Appoint a final decision-maker per forum. Restate strategic intent at every start.',rout:'Outcome-Only Syncs; 51/49 Rule; Intent Intro'},
+    High:{dna:'Loves people and energy in discussion. Enjoys leading from the front.',risk:'Dominant voices crowd out data; action runs ahead of evidence; competing agendas fragment effort.',resp:'Require senior leaders to speak last. Mandate data summary with all proposals. Resolve single most critical agenda overlap.',rout:'Rotating Facilitator; Evidence Gate; Synergy Sync'}},
+  A:{Low:{dna:'Can be very direct or firm in views. May struggle with patience for others\' ideas.',risk:'Conflict turns defensive and erodes trust; ego overrides outcomes; toxic seams between departments.',resp:'Shift to Problem/Data/Options language. Ask whether behaviours are helping or harming outcomes. Force cross-functional task swaps.',rout:'Issue-Evidence-Options; Result-First Review; Seam Huddle'},
+    Balanced:{dna:'Works well with most people. Manages conflict calmly. Balances kindness and firmness.',risk:'Feedback delayed; issues avoided to preserve harmony; apparent agreement masks unresolved risks.',resp:'Challenge work while explicitly demonstrating care. Name the uncomfortable issue in the first five minutes. Ask the team to identify reasons the plan might fail.',rout:'Stop-Start-Continue; Hard-Talk Slot; Pre-Mortem'},
+    High:{dna:'Kind and warm. Ready to help others. Sometimes avoids saying no to preserve peace.',risk:'Agreement given without genuine commitment; team over-commits; resentment builds beneath surface harmony.',resp:'Assign a formal Devil\'s Advocate role. Require explicit capacity check before accepting new work. Use anonymous mechanisms to surface tensions.',rout:'Rotating Challenger; No-Log; Radical Candor Loop'}},
+  ES:{Low:{dna:'Feels emotions strongly. May react fast under stress. Can take criticism personally.',risk:'Stress triggers impulsive decisions; errors hidden due to fear; anxiety grows from information gaps.',resp:'Mandatory 24-hour pause before high-stakes decisions. Leaders model safety by sharing their own failures. Regular factual briefings during volatile periods.',rout:'Morning-After Review; Error-Share; Daily Truth'},
+    Balanced:{dna:'Usually calm but can feel stress in long pressure periods. Manages emotions most of the time.',risk:'Important emotional signals missed; calm leadership misread as indifference; stability delays necessary urgency.',resp:'Increase visible leadership presence. Use explicit empathy language. Deliberately introduce strategic urgency where required.',rout:'Pulse Audit; Human Sync; Burn Rate Review'},
+    High:{dna:'Stays calm and steady even in chaos. Rarely loses control or reacts emotionally.',risk:'Calm misread as emotional distance; problems overlooked because everything appears fine; frontline disconnect.',resp:'Explicitly acknowledge effort, strain, and contribution. Demand objective data proving safety and control. Spend regular time embedded in operations.',rout:'Gratitude Minute; Red-Team Audit; Frontline Friday'}},
+  VA:{Low:{dna:'May act differently from the group\'s shared values. Can seem unsure about what the team stands for.',risk:'Personal preference overrides shared values; different parts of the organisation operate under conflicting value systems; trust erodes.',resp:'Publicly pause work that violates stated values. Rotate cultural ambassadors across silos. Conduct a formal review of promises versus delivery.',rout:'Value Filter; Culture Stand-Up; Integrity Scorecard'},
+    Balanced:{dna:'Understands values but may bend them when under pressure.',risk:'Values deprioritised under pressure; values exist conceptually but not operationally; ethical standards applied inconsistently.',resp:'Actively spotlight examples of values in action. Link each value to at least one active performance metric. Reference values during difficult decisions.',rout:'Narrative Share; Value KPI Check; Decision Audit'},
+    High:{dna:'Strongly lives by the organisation\'s values. Acts as role model.',risk:'Strong conviction slows adaptation; external perspectives excluded; judgement focuses on style rather than results.',resp:'Periodically reassess whether values still support strategy. Deliberately introduce outsider viewpoints. Anchor feedback in outcomes and values only.',rout:'Value Evolution; Diversity Huddle; Merit Sync'}},
+  LO:{Low:{dna:'Feels nervous about feedback or change. Avoids new skills for fear of failing.',risk:'Capabilities decay as methods become outdated; feedback resisted because it threatens status; leaders do not invite feedback themselves.',resp:'Require one small new-tool experiment each month. Reframe mistakes as neutral learning data. Leaders explicitly ask for feedback first.',rout:'10-Minute Teach; Post-Mortem Pulse; Reverse Feedback'},
+    Balanced:{dna:'Likes learning when useful. Can lose interest in long or complex lessons.',risk:'Learning remains shallow and episodic; training does not translate into changed behaviour; teams fix symptoms instead of causes.',resp:'Force reflection on root causes. Require a written application note after learning events. Apply Five Whys technique to failures.',rout:'Quarterly Growth Review; 7-Day Implementation; Root-Cause Sync'},
+    High:{dna:'Loves learning and shares knowledge freely. Enjoys experimenting with ideas and tools.',risk:'Excessive experimentation diffuses focus; teams outpace the organisation\'s ability to absorb change; learning not institutionalised.',resp:'Cap learning and experimentation time deliberately. Slow learning cycles to match organisational readiness. Prevent new learning until existing lessons are embedded.',rout:'Playbook Build; Sync Cycle; Standard Build'}}
+};
+
+var SCARF_OBS=[
+  {s:'Defensive behaviour',d:'Status',t:'New leaders or reporting lines that shift power dynamics',a:'Acknowledge expertise publicly; involve high-status people in shaping the change'},
+  {s:'Undermining or second-guessing decisions',d:'Status',t:'New ways of working that shift where expertise and influence sit',a:'Create visible roles for key influencers in the new model; brief them before others'},
+  {s:'Withholding information or cooperation',d:'Status',t:'New systems that make individual performance visible to others',a:'Reframe change as expanding opportunity; communicate individual impact 1:1 first'},
+  {s:'Competing for credit or visibility',d:'Status',t:'New KPIs or performance standards that redefine who succeeds',a:'Redesign recognition to reward collaboration; celebrate team wins visibly'},
+  {s:'Dismissing or belittling new approaches',d:'Status',t:'New tools or methods that devalue existing expertise',a:'Position new approaches as building on existing strengths, not replacing them'},
+  {s:'Repeated clarification requests',d:'Certainty',t:'New goals, priorities or ambiguous task ownership',a:'Publish clear milestones and success criteria; run structured role-clarity sessions'},
+  {s:'Delay disguised as waiting for alignment',d:'Certainty',t:'Changing metrics, review processes or shifting timelines',a:'Create a decision log for key changes; give people a map of what will and will not change'},
+  {s:'Reversion to old habits',d:'Certainty',t:'Ambiguous task ownership or unclear expectations after change',a:'Hold regular short check-ins to close ambiguity loops; reinforce new standards consistently'},
+  {s:'Excessive scenario planning or over-preparation',d:'Certainty',t:'Shifting timelines or inconsistent messaging from leadership',a:'Commit to a single plan publicly; communicate what you know even when it is incomplete'},
+  {s:'Inability to prioritise or make decisions',d:'Certainty',t:'Simultaneous competing priorities with no clear hierarchy',a:'Establish and communicate a clear priority stack; make trade-offs explicit'},
+  {s:'Passive compliance',d:'Autonomy',t:'New standardised processes or tools that reduce discretion',a:'Co-design implementation details with teams; define clearly what is fixed vs flexible'},
+  {s:'Minimal effort delivery',d:'Autonomy',t:'Centralised decision rights or increased oversight and reporting',a:'Allow teams to choose HOW they meet new standards; recognise initiative within the framework'},
+  {s:'Resistance through bureaucracy',d:'Autonomy',t:'Increased reporting requirements or approval layers added',a:'Create feedback channels so people can influence the rollout; share rationale for controls'},
+  {s:'Micromanaging upward',d:'Autonomy',t:'New leaders who bring different decision-making styles',a:'Clarify the decision rights model explicitly; build trust through small delegated wins'},
+  {s:'Working around official processes',d:'Autonomy',t:'Processes perceived as arbitrary or counterproductive',a:'Audit which processes add friction without value; involve teams in redesigning them'},
+  {s:'Silo behaviour',d:'Relatedness',t:'Team restructuring or new cross-functional reporting lines',a:'Maintain existing team rituals during transition; create cross-team moments to build shared identity'},
+  {s:'Reduced collaboration',d:'Relatedness',t:'New leaders, external hires or remote and hybrid work shifts',a:'Personally bridge connections between old and new members; encourage peer knowledge sharing'},
+  {s:'Guarded communication',d:'Relatedness',t:'Team restructuring or leadership change creating uncertainty',a:'Check in 1:1 with those most at risk of feeling displaced; name the discomfort openly'},
+  {s:'Clique formation or in-group/out-group dynamics',d:'Relatedness',t:'Mergers, acquisitions or major team expansions',a:'Create mixed-group working teams on visible projects; reward cross-group collaboration'},
+  {s:'Disengagement from team activities',d:'Relatedness',t:'Remote or hybrid shifts that reduce informal connection',a:'Redesign team touchpoints to create genuine connection, not just status updates'},
+  {s:'Cynicism about change',d:'Fairness',t:'Inconsistent rewards, consequences or unclear decision rationale',a:"Explain the 'why' behind every major decision; apply recognition and consequences consistently"},
+  {s:'Gossip replacing dialogue',d:'Fairness',t:'Selective enforcement of rules or uneven workload distribution',a:'Create a visible, safe process for raising concerns; share what you can — silence breeds suspicion'},
+  {s:'Emotional withdrawal',d:'Fairness',t:'Perceived inequity in how change burdens are distributed',a:'Audit workload distribution proactively; demonstrate fairness through visible, consistent actions'},
+  {s:'Vocal resistance or public dissent',d:'Fairness',t:'Decisions made without consultation or transparent rationale',a:'Involve affected groups in the design of decisions that impact them; close the feedback loop'},
+  {s:'Reduced discretionary effort',d:'Fairness',t:'Reward or recognition systems seen as arbitrary or opaque',a:'Make reward criteria explicit and visible; celebrate effort and process, not just outcomes'}
+];
+
+var CC_DIMENSIONS=[
+  {lbl:'Execution driven by authority/rules',desc:'When leadership attention shifts, does execution weaken significantly?'},
+  {lbl:'Internal ownership vs external pressure',desc:'Do people advance the strategy when leaders are not watching?'},
+  {lbl:'Discretionary effort level',desc:'Do people go beyond minimum requirements voluntarily?'},
+  {lbl:'Escalation to leadership for direction',desc:'Do teams solve problems themselves or wait to be told?'},
+  {lbl:'Adaptability when conditions change',desc:'Do teams respond to change with resilience or wait for instruction?'}
+];
+
+var CC_FEEDBACK=[
+  'Your organisation is operating primarily through compliance. Execution is supervised — and vulnerable the moment leadership attention shifts. Lens 1 work here is corrective: design commitment architecture before building strategy.',
+  'Significant compliance dependency. Discretionary effort and adaptive behaviour are limited. Focus your ACE-IT design on Commitment and Engagement levers before moving forward.',
+  'Mixed profile — some areas driven by commitment, others by compliance. Identify which strategic domains need the most commitment investment. Lens 1 work is targeted.',
+  'Reasonably well-positioned. Some compliance elements remain but commitment is the dominant driver in key areas. Use Lens 1 to reinforce and extend commitment architecture.',
+  'Strong commitment orientation across most dimensions. Your Lens 1 work is confirmatory — reinforce the architecture that is working and identify where compliance creep is beginning to appear.'
+];
+
+var ACEIT_DATA=[
+  {n:'Accountability',def:'Taking full ownership for results, not excuses.',beh:['Defines clear ownership for goals and follow-through','Acknowledges missteps and drives corrective action','Holds self and others to measurable standards'],obs:['Commitments documented and tracked','Reviews end with agreed owners and deadlines','"We missed it, here\'s how we\'ll fix it" language common']},
+  {n:'Commitment',def:'Staying anchored to agreed strategic intent, even when pressure rises.',beh:['Aligns daily choices to long-term direction','Protects priorities from noise or distraction','Follows through on promises despite discomfort'],obs:['Strategic priorities stay consistent','Leaders close loops they open','Non-strategic work is declined or deferred']},
+  {n:'Engagement',def:'Actively involving self and others in sense-making, dialogue, and execution.',beh:['Invites participation and dissent','Listens to understand, not defend','Connects people\'s roles to customer or purpose value'],obs:['Team meetings are two-way','Feedback loops visible in tools or reviews','People quote the shared "why"']},
+  {n:'Integrity',def:'Acting consistently with values, facts, and truth — even when inconvenient.',beh:['Says what is true, not what is easy','Declares conflicts of interest or bias early','Uses data to support choices'],obs:['Evidence cited before decisions','Values referenced in trade-offs','Teams trust that leader\'s word matches deed']},
+  {n:'Transparency',def:'Making reasoning, progress, and constraints visible to all stakeholders.',beh:['Communicates decisions with rationale and data','Shares progress openly, including challenges','Documents choices and lessons for others'],obs:['Dashboards updated regularly','Decisions logged and accessible','"No surprises" culture evident']}
+];
+
+var EMO_DATA={
+  joy:[{lv:'Level 1',sub:'Enthusiasm',sc:'A small project tweak shows early promise. The team is starting to lean in.',risk:'Energy Dissipation — focused effort scatters into low-impact tasks.',resp:'"I love the momentum here. Let\'s protect it by narrowing our focus. What is the one priority we must nail in the next 24 hours?"'},
+       {lv:'Level 2',sub:'Optimism',sc:'The team lands a significant new account. Confidence is high and "anything seems possible."',risk:'Optimism Drift — unrealistic assumptions lead to overcommitment and eventual credibility erosion.',resp:'"This is a massive win, but let\'s ground it. If we were to fail at the finish line, what would be the single obstacle that caused it?"'},
+       {lv:'Level 3',sub:'Excitement',sc:'Massive funding is secured. The atmosphere is manic and the team is ready to sprint indefinitely.',risk:'High Intensity Overload — peak activation leads to rushed decisions and unsustainable burnout.',resp:'"Everyone, eyes up. We are moving too fast. Let\'s take 5 minutes of silence to look at our lists and cut anything we don\'t absolutely need to do right now."'}],
+  fear:[{lv:'Level 1',sub:'Anxiety',sc:'A minor change in reporting lines is announced. People are curious but cautious.',risk:'Hesitation Drift — decision-making slows as people wait for unnecessary certainty.',resp:'"I\'m taking full ownership of how we roll this out. If this doesn\'t go as planned, the responsibility is mine, not yours. Keep moving."'},
+        {lv:'Level 2',sub:'Doubt',sc:'Monthly targets are missed for the first time. The team starts looking for who to blame.',risk:'Information Filtering — people filter "bad news" to avoid trouble, delaying crisis identification.',resp:'"I can feel the hesitation. I want to pause. Give me the one thing that\'s worrying you most right now — no judgment, just the raw risk."'},
+        {lv:'Level 3',sub:'Apprehension',sc:'News of mass layoffs leaks. The team stops working to focus on self-protection.',risk:'Psychological Shutdown — total collapse of transparency; people hide errors to protect themselves.',resp:'"Stop everything. Pens down. We aren\'t talking about targets right now. My priority is your stability. Let\'s talk about what\'s actually happening."'}],
+  anger:[{lv:'Level 1',sub:'Frustration',sc:'A slow approval chain is causing minor delays in daily tasks.',risk:'Passive Friction — mild irritation evolves into persistent tension and slowed collaboration.',resp:'"I can sense the frustration. Let\'s open the valve: everyone has 60 seconds to name one friction point. We won\'t solve it yet — just name it."'},
+         {lv:'Level 2',sub:'Irritation',sc:'Two departments are fighting over the same budget, causing visible friction in meetings.',risk:'Defensive Silos — teams protect their own turf, damaging relationships and delaying results.',resp:'"We\'re fighting over internal tools, but our real competition is outside this room. Let\'s pivot back to how we beat [Competitor] today."'},
+         {lv:'Level 3',sub:'Resistance',sc:'The Board cancels a team\'s hard-won project without consultation. Open defiance is high.',risk:'Active Sabotage — open conflict leads to a "checked-out" culture.',resp:'"The tension is too high for a productive conversation. We\'re taking a 10-minute break. Walk away, reset, and we\'ll reconvene when the heat is down."'}],
+  sadness:[{lv:'Level 1',sub:'Disappointment',sc:'After a week of hard work, the team loses a minor pitch. Spirits are slightly dampened.',risk:'Engagement Calcification — unaddressed let-downs turn into long-term withdrawal.',resp:'"That loss hurts. I want to acknowledge the work you put in. Let\'s take a moment to sit with it before we look at the next pitch."'},
+           {lv:'Level 2',sub:'Fatigue',sc:'The team has been working weekends for a month. Error rates are starting to climb.',risk:'Energy Plateau — prolonged fatigue lowers productivity and makes tasks feel significantly heavier.',resp:'"We\'ve been sprinting too long. To save our quality, we are pausing all non-essential projects. We focus only on [Core Task] until Friday."'},
+           {lv:'Level 3',sub:'Loss',sc:'A beloved, long-term leader leaves the company suddenly. The team feels adrift.',risk:'Purpose Disconnection — deep emotional depletion triggering resignation and loss of hope.',resp:'"We\'ve lost a key part of our team, and it\'s okay to feel that gap. I want to point out [Name]\'s recent win to remind us why our work still matters."'}],
+  disgust:[{lv:'Level 1',sub:'Dissatisfaction',sc:'A deliverable is sent out with obvious typos. The team feels the standard is dropping.',risk:'Standards Decay — tolerance for "good enough" erodes organisational quality.',resp:'"This deliverable isn\'t us. Our reputation is built on excellence, and we\'re going to hold that line. Let\'s bring this back up to standard."'},
+           {lv:'Level 2',sub:'Rejection',sc:'A leader makes a promise in a town hall but does the exact opposite the next day.',risk:'Cynical Drift — team doubts leadership\'s integrity, leading to lack of commitment.',resp:'"I know I said X and did Y. That was a contradiction. My goal is to get us back into alignment. Here\'s how."'},
+           {lv:'Level 3',sub:'Disengagement',sc:'The company is caught in a scandal that contradicts its core values. The team feels ashamed.',risk:'Strategic Rejection — team views the direction as a risk to their credibility, leading to withdrawal.',resp:'"I know many of you are questioning our path. I need your rawest, most honest critique of this direction. Let\'s have the debate out in the open."'}],
+  surprise:[{lv:'Level 1',sub:'Astonished',sc:'A new "priority" is added to the list. The team is confused about what moved down.',risk:'Processing Lag — the team falls behind the pace of change, creating "clarity debt."',resp:'"There\'s too much noise. To clear the debt, we are ignoring everything except these three moves: 1, 2, and 3. Forget the rest for now."'},
+            {lv:'Level 2',sub:'Confusion',sc:'Three new executives are hired in a month. No one knows who reports to whom.',risk:'Novelty Fatigue — frequent changes cause the team to lose track of the core plan.',resp:'"There\'s a lot of change, so let\'s find our anchor. These three things — our mission, our daily standup, and our client focus — will not change."'},
+            {lv:'Level 3',sub:'Overwhelmed',sc:'The company changes its entire business model overnight. The team is in shock.',risk:'Chaos and Shutdown — information overload prevents action, leading to decision paralysis.',resp:'"We are in shock-mode. No new requests for the next two hours. Everyone focus only on processing what we just learned. Clear the decks."'}]
+};
+
+var COMPASS_ZONES=[
+  {n:1,t:'Clarity of Strategic Direction',tl:'When this signal is lit, the organisation is burning fuel without a map.',
+   signal:'The most dangerous fire in any organisation is the one nobody can see — the quiet combustion that happens when leaders believe they are aligned but are, in fact, navigating by different compasses. Clarity of Strategic Direction is not simply whether a strategy document exists. It is whether the people responsible for executing it can describe it in the same language, connect it to their daily decisions, and hold it steady when pressure mounts. When this signal flares, you will hear confidence in meetings and confusion in the corridors.',
+   bp:'Leaders present polished strategies that fracture the moment they leave the room. Priorities multiply. Trade-offs are avoided. Frontline teams work hard in directions that diverge from boardroom intent — not because they are resistant, but because no one has made the destination unambiguous enough to follow.'},
+  {n:2,t:'Organisational Alignment',tl:'Alignment is not agreement in the room. It is coordinated behaviour outside it.',
+   signal:'Of all the flammables in this framework, Organisational Alignment is the one most frequently misdiagnosed. Leaders declare alignment after a planning session, observe nodding in forums, and interpret absence of challenge as shared commitment. True alignment is only visible in behaviour — in whether cross-functional teams move in the same direction without requiring constant senior arbitration, and in whether decisions made at the top survive intact through each layer of the organisation.',
+   bp:'Silos deepen. Functions execute their own version of the strategy. Leaders agree in meetings and relitigate decisions through resource approvals and parallel conversations. Initiatives that require genuine cross-functional collaboration consistently stall.'},
+  {n:3,t:'Management Discipline',tl:'Execution without discipline is intention without consequence.',
+   signal:'Strategy does not fail in the boardroom. It fails in the gap between what leaders decide and what managers actually enforce, measure, and hold people accountable for. Management Discipline tells you whether your organisation\'s operating rhythm — reviews, escalation norms, accountability structures, governance forums — is functioning as a genuine engine of delivery or as an elaborate performance of oversight.',
+   bp:'Performance reviews recycle the same issues without resolution. Governance forums produce reports, not decisions. The same gaps appear in consecutive cycles and are explained rather than corrected. Accountability is diffuse — owned collectively, which means owned by no one.'},
+  {n:4,t:'People & Capability',tl:'The most expensive capability gap is the one you discover mid-execution.',
+   signal:'Organisations frequently approve strategies that their people are not yet equipped to deliver. This signal is alight when there is a meaningful distance between the skills, capacity, and engagement required to execute the strategy and what the organisation actually has available. It shows in middle managers stretched beyond their bandwidth, in succession plans that exist as documents but not as operational reality, in engagement scores that decline year on year.',
+   bp:'Leaders attribute execution failures to process or strategy when the root cause is a capability system never designed to carry the weight being placed on it. By the time the gap becomes undeniable — when key talent exits, when burnout becomes visible — the cost of recovery is substantially higher than early intervention would have been.'},
+  {n:5,t:'Allocation of Resources',tl:'Follow the money. It tells you what the organisation actually believes, not what it says.',
+   signal:'An organisation\'s true strategy is not found in its planning documents — it is found in its budget. When this signal ignites, there is a visible gap between what leadership declares as strategic and what gets funded, staffed, and protected when decisions become difficult. Legacy spend continues by inertia. New priorities are approved in language but starved in practice.',
+   bp:'People accountable for strategic outcomes are handed responsibility without the resources to honour it. The longer resources misalign with stated direction, the more credibility erodes, and the harder it becomes to mobilise genuine commitment behind any priority at all.'},
+  {n:6,t:'Sensing & Adaptation',tl:'An organisation that cannot read the signals around it will eventually be overtaken by them.',
+   signal:'Markets shift. Customer needs evolve. Competitive dynamics change faster than planning cycles. This signal measures whether the organisation is genuinely learning from what is happening around it — or whether it is processing information selectively, defending existing plans, and mistaking activity for responsiveness.',
+   bp:'Customer data is reviewed but not acted on. Market shifts are acknowledged in presentations and then filed away. Leaders defend forecasts rather than update them. When leaders learn that raising uncomfortable signals carries social cost, the organisation gradually loses its early warning system entirely.'},
+  {n:7,t:'Systems & Execution',tl:'A new strategy running through an old machine will always produce the same result.',
+   signal:'This signal asks the hardest question: is the organisation actually built to deliver what it has committed to? Not in aspiration — in architecture. Does the operating model match the strategic priorities? Are the governance structures, technology platforms, role accountabilities, and process designs fit for the direction being pursued — or are they inherited from a previous strategy that no longer applies?',
+   bp:'Technology investments produce impressive demonstrations and negligible adoption. Operating models built for stability are asked to deliver agility. Structural ambiguities create friction that compounds with every execution cycle. Leaders sense that something fundamental is misaligned but reach for tactical interventions rather than redesigning the machine.'}
+];
+
+var CXO_ROLES=[
+  {r:'CEO',c:'Integrates the seven domains into one coherent strategic narrative. Ensures direction, priorities, and trade-offs are communicated with one leadership voice.',d:['Clarity of Strategic Direction','Organisational Alignment']},
+  {r:'CFO',c:'Ensures capital allocation and financial discipline reinforce strategic intent rather than dispersing resources across competing priorities.',d:['Allocation of Resources','Management Discipline']},
+  {r:'COO',c:'Converts strategy into operational flow, ensuring execution routines, coordination, and hand-offs move the organisation forward.',d:['Systems & Execution','Management Discipline']},
+  {r:'CHRO',c:'Aligns leadership behaviour, capability development, and organisational trust with the strategic direction.',d:['People & Capability','Organisational Alignment']},
+  {r:'CTO/CIO',c:'Aligns technology architecture and data capability with the organisation\'s strategic priorities and future operating model.',d:['Systems & Execution','Sensing & Adaptation']},
+  {r:'CMO',c:'Aligns market positioning and brand promise with the organisation\'s operational ability to deliver.',d:['Clarity of Strategic Direction','Sensing & Adaptation']},
+  {r:'CCO',c:'Aligns revenue generation and customer growth strategies with enterprise positioning and operational capacity.',d:['Allocation of Resources','Organisational Alignment']},
+  {r:'CPO',c:'Ensures procurement decisions strengthen operational capability and reinforce strategic priorities.',d:['Systems & Execution','Allocation of Resources']},
+  {r:'CRO',c:'Aligns enterprise risk interpretation so that strategic initiatives operate within a shared risk appetite framework.',d:['Management Discipline','Systems & Execution']},
+  {r:'CSO',c:'Maintains the integrity of the strategic narrative as it moves from formulation into execution across the organisation.',d:['Clarity of Strategic Direction','Sensing & Adaptation']}
+];
+
+var COMPASS_DOMAINS=['Clarity of Strategic Direction','Organisational Alignment','Management Discipline','People & Capability','Allocation of Resources','Sensing & Adaptation','Systems & Execution'];
+var PANO_ROLES=['CEO','CFO','CHRO','COO','CTO/CIO','CMO','CCO','CRO','CSO','CPO'];
+
+/* ════════════════════ INIT ════════════════════ */
+
+window.addEventListener('DOMContentLoaded',function(){
+  buildPrinciples();
+  buildOceanal();
+  buildScarf();
+  buildCCSpectrum();
+  buildACEIT();
+  buildEmo('joy');
+  buildCompass();
+  buildCXOTable();
+  buildPanoSteps();
+});
+
+/* ════════════════════ NAVIGATION ════════════════════ */
+
+function switchArc(n){
+  document.querySelectorAll('.arc-sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.arc-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('arc-'+n).classList.add('active');
+  document.querySelector('[data-arc="'+n+'"]').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function togTool(id){
+  var b=document.getElementById('body-'+id);
+  var t=document.getElementById('tog-'+id);
+  var open=b.style.display!=='none'&&b.style.display!=='';
+  b.style.display=open?'none':'block';
+  t.textContent=open?'▾':'▴';
+  t.classList.toggle('open',!open);
+}
+
+/* ════════════════════ PRINCIPLES ════════════════════ */
+
+function buildPrinciples(){
+  var g=document.getElementById('principle-grid');
+  g.innerHTML=PRINCIPLES.map((p,i)=>`<div class="pcard${i===0?' active':''}" id="pc-${i}">
+    <div class="pcard-hdr" onclick="togPrinciple(${i})">
+      <div class="pcard-num">Principle ${p.n}</div>
+      <div class="pcard-title">${p.title}</div>
+      <span class="pcard-arrow">▾</span>
+    </div>
+    <div class="pcard-body">${p.body}<br><span class="pcard-tag">${p.tag}</span></div>
+  </div>`).join('');
+}
+
+function togPrinciple(i){
+  var clicked=document.getElementById('pc-'+i);
+  var wasOpen=clicked.classList.contains('active');
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('active'));
+  if(!wasOpen) clicked.classList.add('active');
+}
+
+/* ════════════════════ OCEANAL ════════════════════ */
+
+function buildOceanal(){
+  var tbl=document.getElementById('oceanal-tbl');
+  var hdr='<thead><tr><th class="tname">Trait</th>'+ROLES.map(r=>`<th>${r}</th>`).join('')+'<th>Profile</th></tr></thead>';
+  var body='<tbody>'+TRAITS.map(t=>`<tr>
+    <td><span class="tn">${t.n}</span><span class="td">${t.d}</span></td>
+    ${ROLES.map(r=>`<td><input class="si" id="s-${t.id}-${r.replace(/\//g,'_')}" type="number" min="1" max="5" placeholder="—" oninput="liveScore('${t.id}','${r.replace(/\//g,'_')}',this.value)"></td>`).join('')}
+    <td id="profile-${t.id}" style="font-size:.64rem;color:var(--tx3);white-space:nowrap">—</td>
+  </tr>`).join('')+'</tbody>';
+  tbl.innerHTML=hdr+body;
+}
+
+function scoreToLevel(v){return v<=2?'L':v===3?'B':'H';}
+function levelLabel(l){return l==='H'?'High':l==='L'?'Low':'Balanced';}
+
+function liveScore(tid,role,val){
+  // Update the profile summary column live as scores are entered
+  var v=parseInt(val);
+  var cell=document.getElementById('profile-'+tid);
+  var scores=ROLES.map(r=>{
+    var el=document.getElementById('s-'+tid+'-'+r.replace(/\//g,'_'));
+    var sv=parseInt(el?el.value:'');
+    return isNaN(sv)?null:sv;
+  }).filter(s=>s!==null);
+  if(scores.length===0){cell.innerHTML='—';return;}
+  var H=scores.filter(s=>s>=4).length,L=scores.filter(s=>s<=2).length,B=scores.filter(s=>s===3).length;
+  var dom=H>=L&&H>=B?'H':(L>=H&&L>=B?'L':'B');
+  cell.innerHTML=`<span class="hlv ${dom}">${levelLabel(dom)}</span><br><span style="color:var(--tx3)">H:${H} B:${B} L:${L}</span>`;
+}
+
+function calcOceanal(){
+  var out=document.getElementById('oceanal-results');
+  var traitProfiles=[];
+  var html='<div class="sdiv"><span>Your Organisation\'s Team Behavioural DNA</span></div>';
+
+  TRAITS.forEach(t=>{
+    // Only include roles with actual scores entered
+    var scored=ROLES.map(r=>{
+      var el=document.getElementById('s-'+t.id+'-'+r.replace(/\//g,'_'));
+      var v=el?parseInt(el.value):NaN;
+      return isNaN(v)?null:{role:r,val:v,level:scoreToLevel(v)};
+    }).filter(x=>x!==null);
+
+    if(scored.length===0){
+      traitProfiles.push({trait:t.n,id:t.id,dom:'Balanced',scored:0,H:0,B:0,L:0});
+      return;
+    }
+
+    var H=scored.filter(s=>s.level==='H').length;
+    var L=scored.filter(s=>s.level==='L').length;
+    var B=scored.filter(s=>s.level==='B').length;
+    var total=scored.length;
+
+    // Dominant: whichever level has most. Ties go to the more extreme (H or L over B).
+    var dom;
+    if(H>=L&&H>=B)dom='H';
+    else if(L>=H&&L>=B)dom='L';
+    else dom='B';
+
+    var domKey=dom==='H'?'High':dom==='L'?'Low':'Balanced';
+    var g=GRD[t.id][domKey];
+    traitProfiles.push({trait:t.n,id:t.id,dom:domKey,domCode:dom,scored:total,H,B,L,g});
+
+    var bH=Math.round(H/total*100),bB=Math.round(B/total*100),bL=Math.round(L/total*100);
+    // Per-person breakdown
+    var roleBreakdown=scored.map(s=>`<span class="hlv ${s.level}" style="font-size:.6rem;margin-right:2px" title="${s.role}: ${s.val}">${s.role.substring(0,3)}</span>`).join('');
+
+    html+=`<div class="trait-result">
+      <div class="tr-header">
+        <div class="tr-name">${t.n}</div>
+        <span class="hlv ${dom}" style="font-size:.76rem">${domKey}</span>
+        <div style="display:flex;gap:2px;flex:1;max-width:140px">
+          <div style="flex:${bH||0.1};height:7px;border-radius:3px;background:#2EA87A" title="High: ${H}"></div>
+          <div style="flex:${bB||0.1};height:7px;border-radius:3px;background:#E8A020" title="Balanced: ${B}"></div>
+          <div style="flex:${bL||0.1};height:7px;border-radius:3px;background:#B22222" title="Low: ${L}"></div>
+        </div>
+        <span style="font-size:.62rem;color:var(--tx3)">${total} scored</span>
+      </div>
+      <div style="margin-bottom:.5rem;display:flex;flex-wrap:wrap;gap:3px">${roleBreakdown}</div>
+      <div class="tr-dna">${g.dna}</div>
+      <div class="tr-grid">
+        <div class="trc risk"><div class="trc-lbl">Execution Risk</div><div class="trc-txt">${g.risk}</div></div>
+        <div class="trc resp"><div class="trc-lbl">Leadership Response</div><div class="trc-txt">${g.resp}</div></div>
+        <div class="trc rout"><div class="trc-lbl">Institutionalised Routine</div><div class="trc-txt">${g.rout}</div></div>
+      </div>
+    </div>`;
+  });
+
+  out.innerHTML=html;
+  out.style.display='block';
+
+  // Store for report + flag ready
+  reportState.traitProfiles=traitProfiles;
+  reportState.oceanalDone=traitProfiles.some(p=>p.scored>0);
+  checkReportReady();
+
+  // Generate strategy implications
+  buildStrategyImplications(traitProfiles);
+}
+
+function buildStrategyImplications(profiles){
+  var scoredProfiles=profiles.filter(p=>p.scored>0);
+  if(scoredProfiles.length===0)return;
+
+  var risks=[], designs=[], watches=[], strengths=[];
+
+  scoredProfiles.forEach(p=>{
+    var d=p.dom;
+    var t=p.trait;
+    // Map each dominant profile to a specific strategy process implication
+    if(t==='Openness'&&d==='Low')risks.push('Decision velocity in strategy sessions will be slow — the team will seek certainty before committing to direction. Build explicit 70%-confidence decision rules into Lens 2 (SiP) to prevent stalling.');
+    if(t==='Openness'&&d==='Balanced')designs.push('Openness balanced: the team will engage with new strategic directions when supported by evidence. Design pilots and proof points into the execution architecture.');
+    if(t==='Openness'&&d==='High')watches.push('High openness creates fragmentation risk in strategy design — multiple competing directions will be generated. Enforce strict prioritisation protocols before Lens 3 (KISS Mapping).');
+    if(t==='Conscientiousness'&&d==='Low')risks.push('Commitments made in strategy sessions are at high risk of not being followed through. Build visible ownership systems and progress boards into the OKR design in Lens 3.');
+    if(t==='Conscientiousness'&&d==='High')watches.push('High conscientiousness may cause over-engineering of the strategy document itself. Time-box planning phases and define Minimum Viable Output for each lens deliverable.');
+    if(t==='Extraversion'&&d==='Low')designs.push('Low extraversion means the most valuable insights in this team will not surface in open discussion. Use written pre-input protocols before all strategy arc discussions.');
+    if(t==='Extraversion'&&d==='High')risks.push('High extraversion creates authority bias risk — dominant voices will frame strategy for the team. Enforce leader-last speaking rules in Lens 2 visioning discussions.');
+    if(t==='Agreeableness'&&d==='Low')watches.push('Low agreeableness increases the risk of adversarial dynamics in cross-CXO strategy sessions. Deploy Problem/Data/Options debate structure for all contested decisions from Lens 2 onwards.');
+    if(t==='Agreeableness'&&d==='High')risks.push('High agreeableness creates false consensus risk — apparent alignment in strategy sessions will mask unresolved disagreements. Build Pre-Mortem checks into Lens 4 (ABCV Integrity Check).');
+    if(t==='Emotional Stability'&&d==='Low')designs.push('Low emotional stability requires explicit climate regulation protocols in each session. Use the Emotional Climate Thermometer actively across all four lenses — do not wait for breakdown.');
+    if(t==='Emotional Stability'&&d==='High')watches.push('High emotional stability can mask urgency signals. Ensure the strategy process includes explicit "burning platform" naming moments — calmness must not become complacency.');
+    if(t==='Values Alignment'&&d==='High')strengths.push('High values alignment is a strategic asset: this team can anchor difficult decisions to shared principles. Embed values-based decision criteria explicitly into the ABCV Integrity Check in Lens 4.');
+    if(t==='Values Alignment'&&d==='Low')risks.push('Low values alignment creates inconsistent decision standards across the CXO team. Establish shared decision criteria early in Lens 2 — without this, strategy will be interpreted differently at each leadership layer.');
+    if(t==='Learning Orientation'&&d==='Low')risks.push('Low learning orientation means course-correction signals will be resisted. Build explicit feedback loops and review cadences into the OKR and Stress Testing lenses (3 and 9).');
+    if(t==='Learning Orientation'&&d==='High')strengths.push('High learning orientation is a strategy process accelerator. Use this team\'s appetite for iteration to build adaptive review cycles into every lens deliverable.');
+  });
+
+  if(risks.length===0&&designs.length===0&&watches.length===0&&strengths.length===0)return;
+
+  var cards='';
+  if(risks.length>0)cards+=`<div class="dna-impl-card"><div class="dic-label risk">Strategy Process Risks</div><div class="dic-txt">${risks.map(r=>`• ${r}`).join('<br><br>')}</div></div>`;
+  if(designs.length>0)cards+=`<div class="dna-impl-card"><div class="dic-label design">Design Adjustments Required</div><div class="dic-txt">${designs.map(r=>`• ${r}`).join('<br><br>')}</div></div>`;
+  if(watches.length>0)cards+=`<div class="dna-impl-card"><div class="dic-label watch">Watch Points</div><div class="dic-txt">${watches.map(r=>`• ${r}`).join('<br><br>')}</div></div>`;
+  if(strengths.length>0)cards+=`<div class="dna-impl-card"><div class="dic-label strength">Team Strengths to Leverage</div><div class="dic-txt">${strengths.map(r=>`• ${r}`).join('<br><br>')}</div></div>`;
+
+  var impl=document.getElementById('dna-implications');
+  if(impl){
+    impl.style.display='block';
+    impl.querySelector('.dna-impl-grid').innerHTML=cards;
+  }
+}
+
+var scarfLog={};
+
+var SCARF_LEADERSHIP_ACTIONS={
+  Status:{
+    readiness:'Status threats reduce cognitive bandwidth and trigger political self-protection. Leaders must publicly reinforce the value and relevance of each role before strategic dialogue can be genuinely open.',
+    priorities:['Acknowledge expertise publicly before making any changes that shift influence or authority','Involve high-status individuals in shaping — not just receiving — the new direction','Communicate individual role implications 1:1 before group announcements','Create visible leadership roles in the transition for those most at risk of status loss']
+  },
+  Certainty:{
+    readiness:'Certainty threat converts strategic ambiguity into paralysis. People can only commit to a direction they can describe. Clarity of process must precede clarity of outcome.',
+    priorities:['Publish a visible decision log and "what will and will not change" map before Lens 2 work begins','Run role-clarity sessions to close ownership ambiguity — unclear task boundaries will replicate as strategic drift','Commit to a single plan publicly even when it is not yet complete','Establish a clear priority stack and make trade-offs explicit rather than leaving them implied']
+  },
+  Autonomy:{
+    readiness:'Autonomy threat produces mechanical execution — technically compliant, strategically inert. People need control over how they deliver, not just what they deliver.',
+    priorities:['Co-design implementation details with the teams who will execute — define clearly what is fixed vs flexible','Allow teams to choose their approach to meeting new standards within agreed boundaries','Create feedback channels so people can influence the rollout rather than just receive it','Audit which current processes add friction without value and involve teams in redesigning them']
+  },
+  Relatedness:{
+    readiness:'Relatedness threat breaks the informal coordination system. Trust between teams is the invisible infrastructure that makes formal strategy possible. Without it, alignment forums become performance.',
+    priorities:['Maintain existing team rituals and connection points during any structural transition','Create deliberate cross-team touchpoints that build shared identity — not just status updates','Check in 1:1 with those most at risk of feeling displaced; name the discomfort openly','Hold mixed-group working sessions on visible, meaningful projects to rebuild relationship bridges']
+  },
+  Fairness:{
+    readiness:'Fairness threat produces cynicism — the most corrosive organisational state. Once people believe the rules do not apply equally, every leadership message is filtered through scepticism.',
+    priorities:["Explain the 'why' behind every major decision — decisions without rationale are interpreted as arbitrary","Apply recognition and consequences consistently; visible exceptions to stated rules destroy credibility","Create a visible, safe mechanism for raising concerns — silence breeds resentment, not acceptance","Audit workload distribution proactively; inequitable burden during change is the most common fairness trigger"]
+  }
+};
+
+function buildScarf(){
+  var list=document.getElementById('scarf-list');
+  list.innerHTML=SCARF_OBS.map((o,i)=>`
+    <div class="obs-row" id="obs-${i}" onclick="logObs(${i})">
+      <div>
+        <div class="obs-sign">${o.s}</div>
+        <span class="obs-tag dtag-${o.d}">${o.d}</span>
+        <div class="obs-info">Trigger: ${o.t}</div>
+        <div class="obs-action">→ ${o.a}</div>
+      </div>
+      <button class="log-btn" id="lbtn-${i}">Log</button>
+    </div>`).join('');
+  updateScarfSummary();
+}
+
+function logObs(i){
+  scarfLog[i]=!scarfLog[i];
+  document.getElementById('obs-'+i).classList.toggle('logged',scarfLog[i]);
+  document.getElementById('lbtn-'+i).textContent=scarfLog[i]?'✓ Logged':'Log';
+  updateScarfSummary();
+}
+
+function updateScarfSummary(){
+  var doms=['Status','Certainty','Autonomy','Relatedness','Fairness'];
+  var cnts={Status:0,Certainty:0,Autonomy:0,Relatedness:0,Fairness:0};
+  var logged={Status:[],Certainty:[],Autonomy:[],Relatedness:[],Fairness:[]};
+  Object.keys(scarfLog).forEach(i=>{if(scarfLog[i]){cnts[SCARF_OBS[i].d]++;logged[SCARF_OBS[i].d].push(i);}});
+  var total=Object.values(cnts).reduce((a,b)=>a+b,0);
+  var panel=document.getElementById('scarf-summary');
+  if(total===0){panel.innerHTML='<div class="info-note">Log observable signs above to generate your SCARF Climate Report. Each sign you log contributes to the domain activation profile and triggers specific leadership readiness actions.</div>';return;}
+
+  // Climate readiness score (inverted — high logged = low readiness)
+  var maxPossible=25;
+  var score=Math.max(0,Math.round((1-(total/maxPossible))*100));
+  var scoreClass=score>=70?'scs-green':score>=45?'scs-amber':'scs-red';
+  var scoreLabel=score>=70?'Climate Ready for Strategy Work':score>=45?'Moderate Climate Risk — Address Before Lens 2':'High Climate Risk — Stabilise Before Proceeding';
+  var scoreDesc=score>=70
+    ?'Your observable climate signals suggest the team can engage with strategy design productively. Continue monitoring SCARF domains throughout the BUILD process.'
+    :score>=45
+    ?`${total} observable signs are active across your climate. Address the highest-activation domains before moving into strategy content — unresolved climate friction will surface as execution fragmentation later.`
+    :`${total} observable signs are active. This level of social threat activation will significantly limit the quality of strategic thinking and commitment available to your team. Leadership attention to climate stabilisation is urgent.`;
+
+  var domOrder=[...doms].sort((a,b)=>cnts[b]-cnts[a]);
+  var domColors={Status:'#4A7AEE',Certainty:'#E88A1A',Autonomy:'#9A4AEE',Relatedness:'#2ABA6A',Fairness:'#EA3A3A'};
+  var domBg={Status:'#E8F0FF',Certainty:'#FFF0E0',Autonomy:'#F0E8FF',Relatedness:'#E0FFEE',Fairness:'#FFE8E8'};
+
+  var domBadge=c=>c>=3?'badge-high':c>=2?'badge-mod':c>=1?'badge-low':'badge-none';
+  var domBadgeTxt=c=>c>=3?'High activation':c>=2?'Moderate activation':c>=1?'Emerging signal':'Not activated';
+
+  var html=`<div class="scarf-report">
+  <div class="scarf-climate-score ${scoreClass}">
+    <div class="scs-score">${score}</div>
+    <div><div class="scs-label">${scoreLabel}</div><div class="scs-desc">${scoreDesc}</div></div>
+  </div>
+  <div class="sdiv"><span>Domain-by-Domain Climate Report</span></div>`;
+
+  domOrder.forEach(d=>{
+    var c=cnts[d];
+    var la=SCARF_LEADERSHIP_ACTIONS[d];
+    var signsList=logged[d].map(i=>`<div class="sdr-sign-item">• ${SCARF_OBS[i].s}</div>`).join('');
+    var actionItems=c>0?la.priorities.map(a=>`<div class="sdr-action-item">→ ${a}</div>`).join(''):'';
+
+    html+=`<div class="scarf-domain-report">
+    <div class="sdr-hdr">
+      <div class="sdr-dot" style="background:${domColors[d]}"></div>
+      <div class="sdr-title">${d}</div>
+      <span class="sdr-badge ${domBadge(c)}">${c}/5 signs · ${domBadgeTxt(c)}</span>
+    </div>`;
+    if(c>0){html+=`<div class="sdr-body">
+      <div class="sdr-signs-lbl">Observed in your organisation</div>
+      <div class="sdr-sign-list">${signsList}</div>
+      <div class="sdr-action-lbl">Leadership readiness actions required</div>
+      <div class="sdr-actions">${actionItems}</div>
+      <div class="sdr-readiness">${la.readiness}</div>
+    </div>`;}
+    html+=`</div>`;
+  });
+
+  html+='</div>';
+  panel.innerHTML=html;
+
+  // Build narrative summary below the domain report
+  buildScarfNarrative(cnts,logged,total);
+}
+
+/* ════════════════════ COMPLIANCE SPECTRUM ════════════════════ */
+
+function buildCCSpectrum(){
+  var wrap=document.querySelector('.cc-spectrum');
+  var sliders=document.getElementById('cc-sliders');
+  if(!sliders)return;
+  sliders.innerHTML=CC_DIMENSIONS.map((d,i)=>`
+    <div class="cc-row">
+      <div class="cc-label" title="${d.desc}">${d.lbl}</div>
+      <input class="cc-slider" id="cc-${i}" type="range" min="1" max="10" value="5" oninput="updateCCFeedback()">
+      <span class="cc-val" id="ccv-${i}">5</span>
+    </div>`).join('');
+}
+
+function updateCCFeedback(){
+  var total=0,n=CC_DIMENSIONS.length;
+  for(var i=0;i<n;i++){
+    var v=parseInt(document.getElementById('cc-'+i).value);
+    document.getElementById('ccv-'+i).textContent=v;
+    total+=v;
+  }
+  var avg=Math.round(total/n);
+  var idx=avg<=3?0:avg<=5?1:avg<=6?2:avg<=8?3:4;
+  document.getElementById('cc-feedback').textContent=CC_FEEDBACK[idx];
+}
+
+/* ════════════════════ ACE-IT ════════════════════ */
+
+function buildACEIT(){
+  var tbl=document.getElementById('aceit-tbl');
+  var h='<thead><tr><th style="width:120px">Anchor Behaviour</th><th>Definition</th><th>Desired Leadership Behaviour</th><th style="width:220px">Observable Signs — log what you see in your organisation</th></tr></thead>';
+  var b='<tbody>'+ACEIT_DATA.map(a=>`<tr>
+    <td><div class="aceit-name">${a.n}<span>${a.def}</span></div></td>
+    <td style="font-size:.73rem;color:var(--tx2);line-height:1.55">${a.def}</td>
+    <td style="font-size:.72rem;color:var(--tx2);line-height:1.55">${a.beh.map(b=>`• ${b}`).join('<br>')}</td>
+    <td class="obs-col" style="font-size:.71rem;color:var(--tx2);line-height:1.65">${a.obs.map((o,i)=>`<div><input type="checkbox" id="ace-${a.n}-${i}"> ${o}</div>`).join('')}</td>
+  </tr>`).join('')+'</tbody>';
+  tbl.innerHTML=h+b;
+}
+
+/* ════════════════════ EMOTIONAL CLIMATE ════════════════════ */
+
+var emoKeys=['joy','fear','anger','sadness','disgust','surprise'];
+var emoLabels={joy:'😊 Joy',fear:'😰 Fear',anger:'😤 Anger',sadness:'😔 Sadness',disgust:'😒 Disgust',surprise:'😲 Surprise'};
+var emoThemes={joy:'Engagement Energy',fear:'Psychological Safety',anger:'Friction Load',sadness:'Morale Drain',disgust:'Cultural Integrity',surprise:'Clarity Tension'};
+
+function buildEmo(emo){
+  // tabs
+  var tabs=document.getElementById('emo-tabs');
+  if(tabs)tabs.innerHTML=emoKeys.map(e=>`<div class="emo-tab${e===emo?' active':''}" data-e="${e}" onclick="switchEmo('${e}')">${emoLabels[e]} — ${emoThemes[e]}</div>`).join('');
+  // content
+  var data=EMO_DATA[emo];
+  var content=document.getElementById('emo-content');
+  if(!content)return;
+  content.innerHTML=`<div class="emo-grid">${data.map(s=>`<div class="emo-card ec-${emo}">
+    <div class="ec-level">${s.lv}</div>
+    <div class="ec-sub">${s.sub}</div>
+    <div class="ec-scen">${s.sc}</div>
+    <div class="ec-rlbl">Execution Risk if Unaddressed</div>
+    <div class="ec-rtxt">${s.risk}</div>
+    <div class="ec-albl">Leadership Response</div>
+    <div class="ec-atxt">${s.resp}</div>
+  </div>`).join('')}</div>`;
+}
+
+function switchEmo(emo){buildEmo(emo);}
+
+/* ════════════════════ COMPASS ════════════════════ */
+
+var heatState={};
+
+function buildCompass(){
+  var grid=document.getElementById('compass-grid');
+  grid.innerHTML=COMPASS_ZONES.map((z,zi)=>`
+    <div class="compass-zone" id="czone-${zi}">
+      <div class="cz-hdr" onclick="togCZ(${zi})">
+        <div class="cz-num">${z.n}</div>
+        <div class="cz-meta">
+          <div class="cz-title">${z.t}</div>
+          <div class="cz-tagline">${z.tl}</div>
+        </div>
+        <div class="cz-heat">
+          <span class="heat-lbl">Heat:</span>
+          <div class="heat-dots" id="heat-${zi}">${[1,2,3,4,5].map(d=>`<div class="hdot" id="hd-${zi}-${d}" onclick="setHeat(event,${zi},${d})" title="Level ${d}"></div>`).join('')}</div>
+        </div>
+      </div>
+      <div class="cz-body">
+        <div class="cz-signal">${z.signal}</div>
+        <div class="cz-bp-label">Burning Platform signal — what it looks like when this zone has crossed the threshold</div>
+        <div class="cz-bp-signal">${z.bp}</div>
+        <div class="cz-assess">
+          <div class="cz-assess-lbl">Your organisation's current situation in this domain:</div>
+          <textarea class="cz-notes" placeholder="Describe what you are observing in this domain. Who is most affected? What has already been tried? What is the cost of continued misalignment?"></textarea>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function togCZ(i){
+  document.getElementById('czone-'+i).classList.toggle('cz-open');
+}
+
+function setHeat(e,zi,level){
+  e.stopPropagation();
+  heatState[zi]=level;
+  for(var d=1;d<=5;d++){document.getElementById('hd-'+zi+'-'+d).classList.toggle('on',d<=level);}
+}
+
+/* ════════════════════ CXO TABLE ════════════════════ */
+
+function buildCXOTable(){
+  var tbl=document.getElementById('cxo-tbl');
+  tbl.innerHTML='<thead><tr><th>CXO Role</th><th>Converging Zone Contribution</th><th>Top 2 COMPASS Domains Most Activated</th></tr></thead><tbody>'+
+  CXO_ROLES.map(r=>`<tr>
+    <td class="cxo-role">${r.r}</td>
+    <td class="cxo-contrib">${r.c}</td>
+    <td><div class="cxo-domains">${r.d.map(d=>`<span class="domain-tag">${d}</span>`).join('')}</div></td>
+  </tr>`).join('')+'</tbody>';
+}
+
+/* ════════════════════ PANORAMIC ════════════════════ */
+
+function buildPanoSteps(){
+  var steps=document.getElementById('pano-steps');
+  steps.innerHTML=`
+  <div class="pstep" id="ps-1">
+    <div class="pstep-hdr" onclick="togPS(1)">
+      <div class="pstep-n">1</div>
+      <div class="pstep-meta"><div class="pstep-title">Self-Reflection & Colleague Interpretation</div><div class="pstep-time">10 minutes — individual then pair</div></div>
+    </div>
+    <div class="pstep-body">
+      <p>Each CXO completes the converging zone table for their own role and three closely related CXO roles. You are not filling in generic answers — you are describing how <strong>your specific organisation's context</strong> shapes each role's alignment responsibilities.</p>
+      <p>Reflect on: which two COMPASS domains does your role most directly activate? What specific organisational conditions in your company make those domains the most critical for your function? Which colleague roles are most interdependent with yours — and what do you believe their primary domain contributions are?</p>
+      <table class="self-table">
+        <thead><tr><th>Role</th><th>Convergence contribution (why aligning hearts &amp; minds is critical for this role in our organisation)</th><th>Top 2 COMPASS domains</th></tr></thead>
+        <tbody>${['Your role','Colleague 1','Colleague 2','Colleague 3'].map((r,i)=>`<tr>
+          <td class="role-col"><input type="text" style="border:1px solid var(--bdr2);border-radius:5px;padding:.3rem .4rem;font-size:.73rem;width:90px;font-family:'DM Sans',sans-serif" placeholder="${r}"></td>
+          <td><textarea class="stx" placeholder="Describe the convergence contribution specific to your organisation..."></textarea></td>
+          <td>
+            <select class="sdmn"><option value="">Domain 1…</option>${COMPASS_DOMAINS.map(d=>`<option>${d}</option>`).join('')}</select>
+            <select class="sdmn" style="margin-top:4px"><option value="">Domain 2…</option>${COMPASS_DOMAINS.map(d=>`<option>${d}</option>`).join('')}</select>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="pstep" id="ps-2">
+    <div class="pstep-hdr" onclick="togPS(2)">
+      <div class="pstep-n">2</div>
+      <div class="pstep-meta"><div class="pstep-title">Perspective Exchange</div><div class="pstep-time">5 minutes — pair discussion</div></div>
+    </div>
+    <div class="pstep-body">
+      <p>Share your completed tables with the colleague whose role you selected. Each of you explains:</p>
+      <p><strong>Why you chose those two domains for your own role</strong> — what is it about your function's specific scope, relationships, and accountabilities that makes those domains your primary responsibility?</p>
+      <p><strong>Why you believe your colleague's role most strongly activates the domains you assigned</strong> — what is the organisational logic connecting their function to those domains?</p>
+      <p>Your colleague then responds: Do you agree with that interpretation of your role? Which domains would you add or adjust, and why?</p>
+      <div class="info-note">These differences are normal and expected. They illustrate precisely why the Converging Zone is necessary. The Converging Zone emerges when executive leaders move from individual interpretations of responsibility to a shared understanding of how their roles jointly stabilise the organisation's alignment.</div>
+    </div>
+  </div>
+
+  <div class="pstep" id="ps-3">
+    <div class="pstep-hdr" onclick="togPS(3)">
+      <div class="pstep-n">3</div>
+      <div class="pstep-meta"><div class="pstep-title">Convergence Discussion — Collective Intelligence Moment</div><div class="pstep-time">5 minutes — full group</div></div>
+    </div>
+    <div class="pstep-body">
+      <p>The facilitator brings the full group to reflect on the pair exchanges:</p>
+      <p><strong>1. Where did participants naturally agree on domain responsibility?</strong> Which roles and domains were unambiguous across the team — and what does that tell you about how your organisation operates?</p>
+      <p><strong>2. Where did interpretations differ across roles?</strong> What does the disagreement reveal about the assumptions each function carries about its scope, authority, and strategic contribution?</p>
+      <p><strong>3. What does this mean for Lens 1?</strong> Where in your seven COMPASS domains is your leadership team's convergence most urgently needed right now — and what specific alignment work must happen before you move into Lens 2?</p>
+      <div class="info-note"><strong>The Converging Zone is not just an exercise — it is an operating commitment.</strong> When convergence occurs, the organisation receives one coherent leadership signal rather than multiple functional interpretations. When convergence fails, each domain begins to drift because different leaders unintentionally transmit different interpretations of the strategy.</div>
+      <div class="cz-assess" style="margin-top:.75rem">
+        <div class="cz-assess-lbl">Our team's convergence commitment for Lens 1 — what we are aligning on before we proceed:</div>
+        <textarea class="cz-notes" style="min-height:72px" placeholder="Record your team's specific convergence commitments here. What shared interpretation of strategic direction, role responsibilities, and COMPASS priorities are you carrying forward into Lens 2?"></textarea>
+      </div>
+    </div>
+  </div>`;
+}
+
+function togPS(n){
+  document.getElementById('ps-'+n).classList.toggle('ps-open');
+}
+
+/* ════════════════════ REPORT STATE ════════════════════ */
+
+var reportState={oceanalDone:false,scarfDone:false,traitProfiles:[],scarfData:{cnts:{},logged:{},total:0}};
+
+function checkReportReady(){
+  var ready=reportState.oceanalDone&&reportState.scarfDone;
+  document.getElementById('btn-gen-report').disabled=!ready;
+  document.getElementById('btn-copy-report').disabled=!ready;
+}
+
+/* ════════════════════ SCARF NARRATIVE SUMMARY ════════════════════ */
+
+function buildScarfNarrative(cnts,logged,total){
+  var doms=['Status','Certainty','Autonomy','Relatedness','Fairness'];
+  var hot=doms.filter(d=>cnts[d]>=3);
+  var mod=doms.filter(d=>cnts[d]===2);
+  var emerging=doms.filter(d=>cnts[d]===1);
+  var clean=doms.filter(d=>cnts[d]===0);
+
+  var dominant=hot.length>0?hot:mod.length>0?mod:emerging;
+  var readinessLevel=total===0?'not assessed':total<=3?'low activation — climate is broadly stable':total<=8?'moderate activation — targeted intervention required':'high activation — climate stabilisation is urgent before strategy work';
+
+  var narrativeParts=[];
+
+  if(total===0){
+    narrativeParts.push('No observable signs have been logged yet. Complete the observation log above to generate your climate narrative.');
+  } else {
+    // Opening sentence — overall picture
+    if(hot.length>=3) narrativeParts.push(`Your organisation is experiencing a <strong>multi-domain climate crisis</strong>. ${hot.join(', ')} are all showing high threat activation simultaneously — this is a pattern associated with organisations undergoing significant structural, leadership, or strategic disruption. The human system is absorbing substantial threat load, which will directly constrain the quality of strategic thinking available in this room.`);
+    else if(hot.length>0) narrativeParts.push(`Your organisation's dominant climate signal is <strong>${hot.join(' and ')} threat</strong>. ${hot.length>1?'These domains are':'This domain is'} showing high activation, indicating that a meaningful proportion of your leadership team's cognitive bandwidth is being consumed by social threat processing rather than strategic engagement.`);
+    else if(mod.length>0) narrativeParts.push(`Your organisation's climate shows <strong>moderate activation</strong> across ${mod.join(', ')}. These are not yet crises — but they represent live friction in the human system that will surface as execution drag if left unaddressed.`);
+    else narrativeParts.push(`Your organisation's climate is showing <strong>emerging signals</strong> in ${emerging.join(', ')}. These are early indicators — the advantage of catching them at this stage is that intervention is developmental rather than corrective.`);
+
+    // Specific domain combinations create compound effects — name them
+    if(cnts.Status>=2&&cnts.Certainty>=2) narrativeParts.push(`The combination of <strong>Status and Certainty activation</strong> is particularly significant: people who are unsure of their standing AND unclear on what success looks like are in a state of double threat. This produces a very specific pattern — confident-sounding agreement in meetings that collapses into conflicting interpretation when people leave the room.`);
+    if(cnts.Autonomy>=2&&cnts.Relatedness>=2) narrativeParts.push(`Concurrent <strong>Autonomy and Relatedness activation</strong> signals a breakdown in the informal coordination system. Teams have lost both the sense of control over their work AND the trust networks that normally compensate for ambiguity. Formal strategy processes cannot substitute for this — the informal system must be rebuilt alongside the formal one.`);
+    if(cnts.Fairness>=2) narrativeParts.push(`<strong>Fairness activation</strong> is present at a level that warrants immediate attention. Fairness threats are the hardest to reverse because they corrode the social contract between leaders and teams. Every strategic commitment made in this room will be interpreted through the lens of whether the organisation applies its stated principles equitably.`);
+
+    // Strategy readiness conclusion
+    if(total>=10) narrativeParts.push(`At this level of climate activation, your leadership team should treat <strong>climate stabilisation as a prerequisite</strong> for strategy design — not a parallel workstream. Proceed with Lenses 2–4 only after the highest-activation domains have been directly addressed.`);
+    else if(total>=5) narrativeParts.push(`The level of climate activation is manageable but real. Proceed with awareness that the domains flagged above will create specific friction points in later lenses — particularly in Lens 2 (SiP visioning) where honest self-assessment is required, and Lens 4 (ABCV) where hard trade-offs must be made.`);
+    else narrativeParts.push(`The climate is broadly stable enough to support the strategy BUILD process. Monitor the emerging signals identified above — they tend to amplify during the intensity of strategy design if not acknowledged early.`);
+  }
+
+  var tags=[`Readiness: ${total===0?'Not assessed':readinessLevel}`];
+  if(hot.length>0) tags.push(`High activation: ${hot.join(', ')}`);
+  if(mod.length>0) tags.push(`Moderate: ${mod.join(', ')}`);
+  if(clean.length>0) tags.push(`Stable: ${clean.join(', ')}`);
+
+  var wrap=document.getElementById('scarf-narrative-wrap');
+  if(wrap) wrap.innerHTML=`<div class="scarf-narrative">
+    <div class="sn-title">Climate Narrative — What This Means for Your Strategy Process</div>
+    <div class="sn-body">${narrativeParts.join('<br><br>')}</div>
+    <div class="sn-tags">${tags.map(t=>`<span class="sn-tag">${t}</span>`).join('')}</div>
+  </div>`;
+
+  // Store for report
+  reportState.scarfData={cnts,logged,total};
+  reportState.scarfDone=total>0;
+  checkReportReady();
+}
+
+/* ════════════════════ GENERATE FULL REPORT ════════════════════ */
+
+function generateReport(){
+  var doms=['Status','Certainty','Autonomy','Relatedness','Fairness'];
+  var cnts=reportState.scarfData.cnts||{};
+  var logged=reportState.scarfData.logged||{};
+  var profiles=reportState.traitProfiles||[];
+  var today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  // ── SECTION 1: OCEANAL trait rows ──
+  var traitRows=profiles.filter(p=>p.scored>0).map(p=>{
+    var domCode=p.domCode||'B';
+    return `<div class="rp-trait-row">
+      <div><div class="rp-t-name">${p.trait}</div><span class="hlv ${domCode}" style="font-size:.65rem">${p.dom}</span></div>
+      <div class="rp-t-dna">${p.g?p.g.dna:'—'}</div>
+      <div class="rp-t-risk">${p.g?p.g.risk:'—'}</div>
+      <div class="rp-t-resp">${p.g?p.g.resp:'—'}</div>
+    </div>`;
+  }).join('');
+
+  // ── SECTION 2: SCARF domain rows ──
+  var domColors={Status:'#4A7AEE',Certainty:'#E88A1A',Autonomy:'#9A4AEE',Relatedness:'#2ABA6A',Fairness:'#EA3A3A'};
+  var scarfRows=doms.map(d=>{
+    var c=cnts[d]||0;
+    var la=SCARF_LEADERSHIP_ACTIONS[d];
+    var signs=(logged[d]||[]).map(i=>`• ${SCARF_OBS[i].s}`).join('<br>');
+    var actions=c>0?la.priorities.slice(0,2).map(a=>`• ${a}`).join('<br>'):'No signs logged';
+    var badge=c>=3?'badge-high':c>=2?'badge-mod':c>=1?'badge-low':'badge-none';
+    var badgeTxt=c>=3?'High':c>=2?'Moderate':c>=1?'Emerging':'Stable';
+    return `<div class="rp-scarf-row">
+      <div><div class="rp-sd-name" style="color:${domColors[d]}">${d}</div><span class="sdr-badge ${badge}" style="font-size:.63rem">${badgeTxt} (${c}/5)</span></div>
+      <div class="rp-sd-signs" style="font-size:.7rem;color:var(--tx2)">${signs||'— No signs logged'}</div>
+      <div class="rp-sd-actions" style="font-size:.7rem;color:#0A4A2A">${actions}</div>
+    </div>`;
+  }).join('');
+
+  // ── SECTION 3: SYNTHESIS narrative (personality × climate) ──
+  var synthInsights=buildSynthesisInsights(profiles,cnts);
+
+  // ── SECTION 4: Implications ──
+  var implCards=document.querySelector('#dna-implications .dna-impl-grid');
+  var implHTML=implCards?implCards.innerHTML:'<div class="rp-impl-cell rp-impl-design"><div class="rp-impl-lbl">Note</div><div class="rp-impl-txt">Complete the OCEANAL profile to generate strategy process implications.</div></div>';
+  // Convert dark panel cards to light print-safe cards
+  implHTML=implHTML.replace(/class="dna-impl-card"/g,'class="rp-impl-cell rp-impl-design"')
+    .replace(/class="dic-label risk"/g,'class="rp-impl-lbl"')
+    .replace(/class="dic-label design"/g,'class="rp-impl-lbl"')
+    .replace(/class="dic-label watch"/g,'class="rp-impl-lbl"')
+    .replace(/class="dic-label strength"/g,'class="rp-impl-lbl"')
+    .replace(/class="dic-txt"/g,'class="rp-impl-txt"');
+
+  var total=reportState.scarfData.total||0;
+  var score=Math.max(0,Math.round((1-(total/25))*100));
+
+  var report=document.getElementById('dna-report');
+  report.innerHTML=`
+  <div class="rp-topbar">
+    <span class="rp-topbar-title">Lens 1 — Awareness: Team DNA Report</span>
+    <div class="rp-topbar-actions">
+      <button class="rp-email" onclick="emailReport()">✉ Copy for Email</button>
+      <button class="rp-print" onclick="window.print()">⬇ Print / Save as PDF</button>
+      <button class="rp-close" onclick="closeReport()">✕ Close</button>
+    </div>
+  </div>
+  <div class="rp-body">
+
+    <div class="rp-masthead">
+      <div class="rp-logo-line">S2R Strategy Design System · Impactis Consulting</div>
+      <div class="rp-doc-title">Lens 1 — Awareness Report</div>
+      <div class="rp-doc-sub">Base Camp 1: Direction · Session 1.1 · Aligning Heart & Mind</div>
+      <div class="rp-org-line">Generated: <span>${today}</span> &nbsp;|&nbsp; Climate Readiness Score: <span>${score}/100</span></div>
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-sec-hdr"><div class="rp-sec-num">1</div><div class="rp-sec-title">Team Behavioural Profile — OCEANAL</div></div>
+      <div style="display:grid;grid-template-columns:140px 70px 1fr 1fr;gap:.65rem;padding:.3rem 0;border-bottom:2px solid var(--bdr)">
+        <div style="font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Trait</div>
+        <div style="font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Level</div>
+        <div style="font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Behavioural Description</div>
+        <div style="font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Leadership Response</div>
+      </div>
+      ${traitRows||'<div style="font-size:.78rem;color:var(--tx3);padding:1rem 0">No OCEANAL scores entered. Complete Tool 1 to populate this section.</div>'}
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-sec-hdr"><div class="rp-sec-num">2</div><div class="rp-sec-title">Climate Diagnostic — SCARF</div></div>
+      <div style="display:grid;grid-template-columns:110px 100px 1fr;gap:.65rem;padding:.3rem 0;border-bottom:2px solid var(--bdr)">
+        <div style="font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Domain</div>
+        <div style="font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Observed signs</div>
+        <div style="font-size:.65rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Priority leadership actions</div>
+      </div>
+      ${scarfRows}
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-sec-hdr"><div class="rp-sec-num">3</div><div class="rp-sec-title">Team DNA Synthesis — Personality × Climate</div></div>
+      ${synthInsights}
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-sec-hdr"><div class="rp-sec-num">4</div><div class="rp-sec-title">Strategy Process Implications</div></div>
+      <div class="rp-impl-grid">${implHTML}</div>
+    </div>
+
+    <div class="rp-section">
+      <div class="rp-sec-hdr"><div class="rp-sec-num">5</div><div class="rp-sec-title">Leadership Commitments — Before Lens 2</div></div>
+      <div style="font-size:.76rem;color:var(--tx3);margin-bottom:1rem;line-height:1.6">Click each field to type directly into the report. Content expands as you write — no text will be cut when printed. To attach a separately prepared commitment document, print this page and staple it behind.</div>
+      <div class="rp-commit-box">
+        <div class="rp-commit-lbl">What our team commits to address before proceeding to Strategy Visioning</div>
+        <div class="rp-commit-field" contenteditable="true" data-placeholder="Record the specific commitments this leadership team is making based on the Awareness diagnostic. What SCARF domains will be actively managed? Which OCEANAL guardrails will be designed into the process? Who owns each action?"></div>
+      </div>
+      <div class="rp-commit-box">
+        <div class="rp-commit-lbl">ACE-IT behaviours we will specifically reinforce in this BUILD process</div>
+        <div class="rp-commit-field" contenteditable="true" data-placeholder="Based on the gaps identified in this session, which of the five ACE-IT anchor behaviours (Accountability, Commitment, Engagement, Integrity, Transparency) require the most deliberate design? How will we make each one observable and measurable?"></div>
+      </div>
+      <div class="rp-commit-box">
+        <div class="rp-commit-lbl">Facilitator notes</div>
+        <div class="rp-commit-field" contenteditable="true" style="min-height:90px" data-placeholder="Observations from the Awareness arc. What surfaced in discussion that is not captured in the diagnostics above? What should the facilitator carry forward into Arcs 2–4?"></div>
+      </div>
+      <div style="margin-top:.85rem;padding:.75rem 1rem;background:var(--surf2);border:1px dashed var(--bdr2);border-radius:8px;font-size:.76rem;color:var(--tx3);line-height:1.65">
+        <strong style="color:var(--tx);display:block;margin-bottom:.2rem">Attaching a commitment document</strong>
+        If your team has prepared a separate commitment summary, print this report using the button above and attach the document behind page 1. The printed report includes a footer line on each page to keep the set together.
+      </div>
+    </div>
+
+    <div class="rp-footer">
+      <div class="rp-footer-brand"><strong>S2R Strategy Design System</strong> · Impactis Consulting · Lens 1: Aligning Heart & Mind</div>
+      <div class="rp-footer-lens">Arc 1 of 4 — Awareness · ${today}</div>
+    </div>
+
+  </div>`;
+
+  report.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function buildSynthesisInsights(profiles,cnts){
+  var insights=[];
+  var scored=profiles.filter(p=>p.scored>0);
+
+  if(scored.length===0&&Object.values(cnts).reduce((a,b)=>a+b,0)===0){
+    return '<div class="rp-synthesis"><div class="rp-synth-title">Complete both diagnostics to generate the synthesis</div><div class="rp-synth-body">The Team DNA Synthesis analyses how your personality profile and climate signals interact to create specific execution dynamics. It requires both the OCEANAL team profile and the SCARF climate observation to be completed.</div></div>';
+  }
+
+  // Compound interactions — personality amplifies or moderates climate
+  var openP=scored.find(p=>p.trait==='Openness');
+  var esP=scored.find(p=>p.trait==='Emotional Stability');
+  var agrP=scored.find(p=>p.trait==='Agreeableness');
+  var conP=scored.find(p=>p.trait==='Conscientiousness');
+  var extP=scored.find(p=>p.trait==='Extraversion');
+  var vaP=scored.find(p=>p.trait==='Values Alignment');
+
+  // Low Openness + High Certainty threat = compounding stall risk
+  if(openP&&openP.dom==='Low'&&(cnts.Certainty||0)>=2)
+    insights.push({title:'Compounding Stall Risk',body:'Your team profile shows Low Openness combined with active Certainty threat. These reinforce each other in a dangerous way: a team already cautious about new approaches is also being asked to act without the certainty they need as a prerequisite. The result is near-certain decision paralysis in strategy sessions. Mitigation: introduce a structured "70% certainty is sufficient to proceed" rule before Lens 2, and pre-communicate the full session agenda to reduce ambiguity before the team arrives.',type:'risk'});
+
+  // High Extraversion + Status threat = authority amplification
+  if(extP&&extP.dom==='High'&&(cnts.Status||0)>=2)
+    insights.push({title:'Authority Amplification Pattern',body:'High Extraversion in a climate where Status is threatened creates a specific dynamic: dominant voices will unconsciously compete to reassert their relevance, and quieter team members will withdraw further. Formal debate structures — leader-last speaking, written pre-input — are essential in this context, not optional.',type:'risk'});
+
+  // Low Agreeableness + Fairness threat = toxic seam risk
+  if(agrP&&agrP.dom==='Low'&&(cnts.Fairness||0)>=2)
+    insights.push({title:'Toxic Seam Risk',body:'Low Agreeableness combined with Fairness activation creates conditions for adversarial cross-functional dynamics. Teams with a naturally direct, competitive style become significantly more defensive when they perceive the rules are not being applied equitably. Ensure all strategy session ground rules are stated explicitly, applied consistently, and that no function is seen to receive preferential framing of its priorities.',type:'risk'});
+
+  // High Values Alignment + Low Relatedness = exclusion dynamic
+  if(vaP&&vaP.dom==='High'&&(cnts.Relatedness||0)>=2)
+    insights.push({title:'In-Group Cohesion vs Relatedness Breakdown',body:'High Values Alignment at team level — while a strategic asset — can become a liability when Relatedness is under threat. Teams with strong shared values tend to close ranks when they feel the social fabric is fraying, which can inadvertently exclude or marginalise those on the periphery of the group. Watch for this in cross-functional strategy sessions involving stakeholders outside the core CXO team.',type:'watch'});
+
+  // Low Conscientiousness + Autonomy threat = execution without ownership
+  if(conP&&conP.dom==='Low'&&(cnts.Autonomy||0)>=2)
+    insights.push({title:'Ownership Vacuum',body:'Low Conscientiousness combined with Autonomy threat produces a specific execution pattern: people will complete tasks to specification but will not take initiative beyond their defined scope, because they neither naturally track ownership nor feel in control of how the work gets done. Every strategy session output in this BUILD process must end with single-named owners and specific deadlines — shared ownership in this profile is no ownership.',type:'design'});
+
+  // Emotional Stability balanced/high + multiple threats = missed signals
+  if(esP&&(esP.dom==='Balanced'||esP.dom==='High')&&Object.values(cnts).reduce((a,b)=>a+b,0)>=5)
+    insights.push({title:'Composed Team, Active Threat — Signal Attenuation Risk',body:'Your team is emotionally steady — which is a strength — but that same composure may be masking the severity of the climate threats visible in the SCARF diagnostic. Calm leadership teams often under-respond to climate signals because they are managing their own reactions well, while underestimating how those same signals are experienced by less senior or less resilient members of the broader organisation. Build explicit climate check-ins into every lens session.',type:'watch'});
+
+  // Strength: High Learning Orientation + stable climate
+  var scarfTotal=Object.values(cnts).reduce((a,b)=>a+b,0);
+  var loP=scored.find(p=>p.trait==='Learning Orientation');
+  if(loP&&loP.dom==='High'&&scarfTotal<=4)
+    insights.push({title:'Optimal Conditions for Adaptive Strategy Design',body:'High Learning Orientation in a broadly stable climate is the best possible starting condition for a strategy BUILD process. This team has both the appetite to work iteratively and the psychological safety to challenge its own assumptions. Use this explicitly: design review loops into each lens deliverable and encourage public course-correction rather than treating revision as failure.',type:'strength'});
+
+  if(insights.length===0){
+    insights.push({title:'Your Personality and Climate Profiles Are Compatible',body:'No strong compound risk interactions were detected between your OCEANAL profile and your SCARF climate signals. This indicates a broadly favourable starting condition for the strategy BUILD process. Continue monitoring the specific domain signals identified in Section 2 and apply the individual trait guardrails from Section 1 as the process progresses.',type:'strength'});
+  }
+
+  var typeMap={risk:'rp-synthesis',watch:'rp-synthesis',design:'rp-synthesis',strength:'rp-synthesis'};
+  var borderMap={risk:'border-left:4px solid #D04040',watch:'border-left:4px solid #E8A020',design:'border-left:4px solid #4A7AEE',strength:'border-left:4px solid #2AB07A'};
+  var labelMap={risk:'Combined Risk','watch':'Watch Point',design:'Design Requirement',strength:'Strength to Leverage'};
+  var labelColMap={risk:'#8A1A1A',watch:'#7A5A00',design:'#1A3A8A',strength:'#0A4A2A'};
+
+  return insights.map(ins=>`<div class="rp-synthesis" style="${borderMap[ins.type]};margin-bottom:.75rem">
+    <div class="rp-synth-title" style="color:${labelColMap[ins.type]}">${labelMap[ins.type]}: ${ins.title}</div>
+    <div class="rp-synth-body">${ins.body}</div>
+  </div>`).join('');
+}
+
+function closeReport(){
+  document.getElementById('dna-report').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function emailReport(){
+  var profiles=reportState.traitProfiles||[];
+  var cnts=reportState.scarfData.cnts||{};
+  var doms=['Status','Certainty','Autonomy','Relatedness','Fairness'];
+  var today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  var lines=[];
+  lines.push('LENS 1 — AWARENESS REPORT');
+  lines.push('S2R Strategy Design System · Impactis Consulting');
+  lines.push('Generated: '+today);
+  lines.push('');
+  lines.push('━━━ SECTION 1: TEAM BEHAVIOURAL PROFILE (OCEANAL) ━━━');
+  profiles.filter(p=>p.scored>0).forEach(p=>{
+    lines.push(`${p.trait}: ${p.dom}`);
+    if(p.g)lines.push(`  Behavioural description: ${p.g.dna}`);
+    if(p.g)lines.push(`  Execution risk: ${p.g.risk}`);
+    if(p.g)lines.push(`  Response: ${p.g.resp}`);
+    lines.push('');
+  });
+  lines.push('━━━ SECTION 2: SCARF CLIMATE DIAGNOSTIC ━━━');
+  var total=reportState.scarfData.total||0;
+  var score=Math.max(0,Math.round((1-(total/25))*100));
+  lines.push(`Climate Readiness Score: ${score}/100`);
+  lines.push(`Total observable signs logged: ${total}/25`);
+  lines.push('');
+  doms.forEach(d=>{
+    var c=cnts[d]||0;
+    var logged=reportState.scarfData.logged||{};
+    lines.push(`${d}: ${c}/5 signs logged`);
+    if(c>0&&logged[d]){
+      logged[d].forEach(i=>lines.push(`  • ${SCARF_OBS[i].s}`));
+      var la=SCARF_LEADERSHIP_ACTIONS[d];
+      lines.push(`  Action: ${la.priorities[0]}`);
+    }
+    lines.push('');
+  });
+  lines.push('━━━ NOTE ━━━');
+  lines.push('For the full formatted report including synthesis and strategy implications, open the Lens 1 file and use the Print / Save as PDF function.');
+  lines.push('');
+  lines.push('S2R Strategy Design System · Impactis Consulting');
+
+  var body=encodeURIComponent(lines.join('\n'));
+  var subject=encodeURIComponent('Lens 1 Awareness Report — '+today);
+  var mailto=`mailto:?subject=${subject}&body=${body}`;
+
+  // Try mailto, fall back to clipboard
+  try{
+    navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+      showToast('Report text copied to clipboard — paste into email');
+    }).catch(()=>{window.location.href=mailto;});
+  }catch(e){window.location.href=mailto;}
+}
+
+function showToast(msg){
+  var t=document.getElementById('copy-toast');
+  if(!t){t=document.createElement('div');t.id='copy-toast';t.className='copy-toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+
+<!-- DNA REPORT PANEL (fullscreen overlay, also print target) -->
+<div id="dna-report"></div>
+<div class="copy-toast" id="copy-toast"></div>
 
 </body>
 </html>
