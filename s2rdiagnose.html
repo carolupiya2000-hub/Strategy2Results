@@ -900,6 +900,17 @@ window.addEventListener("load", checkAccess);
   </span>
 
 </div>
+  function toggleAccess(el) {
+  const input = document.getElementById("access-pw");
+
+  if (input.type === "password") {
+    input.type = "text";
+    el.innerText = "HIDE";
+  } else {
+    input.type = "password";
+    el.innerText = "SHOW";
+  }
+}
 </script>
 
 </body>
