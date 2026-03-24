@@ -368,7 +368,11 @@ footer{background:var(--navy-dk);color:rgba(255,255,255,.32);text-align:center;p
   <div style="background:var(--bg);border-radius:16px;max-width:420px;width:90%;padding:2rem;text-align:center;border-top:4px solid var(--red)">
     <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:.65rem">Strategy2Results® · Impactis Consulting</div>
     <div style="font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--navy);margin-bottom:.3rem">S2R Foundations</div>
-    <div style="font-size:.8rem;color:var(--tx2);margin-bottom:1.3rem;line-height:1.55">This module is access-controlled. Enter your access code to continue. Access is valid for 30 days from first entry.</div>
+    <div style="font-size:.8rem;color:var(--tx2);margin-bottom:1.3rem;line-height:1.55">
+This module is access-controlled.<br>
+Request your access code at: <b>info@impactisconsulting.com</b><br>
+Access is valid for 6 months from first entry.
+</div>
     <input id="access-pw" type="password" placeholder="Enter access code" style="width:100%;padding:.55rem .75rem;border:1px solid var(--bdr2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:.65rem;outline:none">
     <div id="access-err" style="color:#B22222;font-size:.75rem;margin-bottom:.55rem;min-height:1.1rem"></div>
     <button onclick="submitAccess()" style="width:100%;padding:.6rem;background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer">Access Module</button>
@@ -801,3 +805,66 @@ init();
 </script>
 </body>
 </html>
+// ===== ACCESS CONTROL CONFIG =====
+const VALID_CODES = [
+  "S2R-FOUNDATIONS-001",
+  "S2R-FOUNDATIONS-002",
+  "S2R-FOUNDATIONS-003"
+];
+
+const ACCESS_KEY = "s2r_access_granted";
+const ACCESS_TIME_KEY = "s2r_access_time";
+
+// 6 months
+const ACCESS_DURATION = 180 * 24 * 60 * 60 * 1000;
+
+
+// ===== CHECK ACCESS ON LOAD =====
+function checkAccess() {
+  const granted = localStorage.getItem(ACCESS_KEY);
+  const accessTime = localStorage.getItem(ACCESS_TIME_KEY);
+
+  if (!granted || !accessTime) {
+    showAccess();
+    return;
+  }
+
+  const now = new Date().getTime();
+  const elapsed = now - parseInt(accessTime);
+
+  if (elapsed > ACCESS_DURATION) {
+    localStorage.removeItem(ACCESS_KEY);
+    localStorage.removeItem(ACCESS_TIME_KEY);
+    showAccess();
+  } else {
+    hideAccess();
+  }
+}
+
+
+// ===== SUBMIT ACCESS CODE =====
+function submitAccess() {
+  const code = document.getElementById("access-pw").value.trim();
+
+  if (VALID_CODES.includes(code)) {
+    localStorage.setItem(ACCESS_KEY, "true");
+    localStorage.setItem(ACCESS_TIME_KEY, new Date().getTime());
+    hideAccess();
+  } else {
+    document.getElementById("access-err").innerText = "Invalid access code";
+  }
+}
+
+
+// ===== SHOW / HIDE =====
+function showAccess() {
+  document.getElementById("access-overlay").style.display = "flex";
+}
+
+function hideAccess() {
+  document.getElementById("access-overlay").style.display = "none";
+}
+
+
+// ===== RUN ON LOAD =====
+window.addEventListener("load", checkAccess);
